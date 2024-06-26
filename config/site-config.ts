@@ -69,7 +69,7 @@ const GridItems: GridItemInterface[] = [
     title: "Porfolio",
     icon: "github",
     color: "#070707",
-    buttonLink: "https://github.com/batuhanbilginn/makr-ai",
+    buttonLink: "https://github.com/LEO20Debugger/nextjs-portfolio",
     stars: 5,
   },
   {
