@@ -1,9 +1,12 @@
 ⚙️ Tech Stack
+
 Next.js
 lucide-react
 Framer Motion
 Tailwind CSS
+
 🔋 Features
+
 👉 Dark Mode.
 
 👉 Bento Grid: Modern layout presenting personal information using cutting-edge CSS design techniques.
