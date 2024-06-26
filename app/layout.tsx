@@ -1,6 +1,5 @@
 import { ThemeProvider } from "@/components/theme-provider";
 import localFont from "next/font/local";
-import { SpeedInsights } from "@vercel/speed-insights/next"
 import "./globals.css";
 
 const sfPRO = localFont({
