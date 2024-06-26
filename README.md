@@ -1,3 +1,31 @@
+⚙️ Tech Stack
+Next.js
+lucide-react
+Framer Motion
+Tailwind CSS
+🔋 Features
+👉 Dark Mode.
+
+👉 Bento Grid: Modern layout presenting personal information using cutting-edge CSS design techniques.
+
+👉 Responsiveness: Seamless adaptability across all devices, ensuring optimal viewing experience for every user.
+
+and many more, including code architecture and reusability
+
+🤸 Quick Start
+Follow these steps to set up the project locally on your machine.
+
+Prerequisites
+
+Make sure you have the following installed on your machine:
+
+Git
+Node.js
+npm (Node Package Manager)
+
+
+
+
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
 ## Getting Started
