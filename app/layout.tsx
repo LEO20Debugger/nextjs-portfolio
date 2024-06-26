@@ -39,7 +39,7 @@ const sfPRO = localFont({
 });
 
 export const metadata = {
-  title: "leo",
+  title: "Leo - Engineer",
   description: "Bringing codes to life.",
 };
 
