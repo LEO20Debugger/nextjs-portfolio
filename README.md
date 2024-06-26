@@ -1,31 +1,33 @@
-⚙️ Tech Stack
+## <a name="tech-stack">⚙️ Tech Stack</a>
 
-Next.js
-lucide-react
-Framer Motion
-Tailwind CSS
+- Next.js
+- Lucide-react
+- Framer Motion
+- Tailwind CSS
 
-🔋 Features
+## <a name="features">🔋 Features</a>
 
-👉 Dark Mode.
+👉 **Dark Mode**.
 
-👉 Bento Grid: Modern layout presenting personal information using cutting-edge CSS design techniques.
+👉 **Bento Grid**: Modern layout presenting personal information using cutting-edge CSS design techniques.
 
-👉 Responsiveness: Seamless adaptability across all devices, ensuring optimal viewing experience for every user.
+👉 **Responsiveness**: Seamless adaptability across all devices, ensuring optimal viewing experience for every user.
 
-and many more, including code architecture and reusability
+and many more, including code architecture and reusability 
 
-🤸 Quick Start
+## <a name="quick-start">🤸 Quick Start</a>
+
 Follow these steps to set up the project locally on your machine.
 
-Prerequisites
+**Prerequisites**
 
 Make sure you have the following installed on your machine:
 
-Git
-Node.js
-npm (Node Package Manager)
+- [Git](https://git-scm.com/)
+- [Node.js](https://nodejs.org/en)
+- [npm](https://www.npmjs.com/) (Node Package Manager)
 
+**Cloning the Repository**
 
 
 
