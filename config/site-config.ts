@@ -65,21 +65,21 @@ const GridItems: GridItemInterface[] = [
   },
   {
     layout: "2x1",
-    type: "project",
-    title: "Porfolio",
+    type: "",
+    title: "brainergybyleo Portfolio (Nextjs)",
     icon: "github",
     color: "#070707",
-    buttonLink: "https://github.com/LEO20Debugger/nextjs-portfolio",
+    buttonLink: "https://brainergybyleo.vercel.app/",
     stars: 5,
   },
   {
     layout: "2x1",
     type: "project",
-    title: "Blog",
+    title: "nextjs14-markdown-blog",
     icon: "github",
     stars: 2,
     color: "#070707",
-    buttonLink: "https://brainergybyleo.vercel.app/",
+    buttonLink: "https://github.com/LEO20Debugger/nextjs14-markdown-blog",
   },
 ];
 
