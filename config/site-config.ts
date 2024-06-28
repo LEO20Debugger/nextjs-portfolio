@@ -79,7 +79,7 @@ const GridItems: GridItemInterface[] = [
     icon: "github",
     stars: 2,
     color: "#070707",
-    buttonLink: "https://github.com/LEO20Debugger/nextjs14-markdown-blog",
+    buttonLink: "https://github.com/LEO20Debugger/nextjs14-markdown-blog/",
   },
 ];
 
