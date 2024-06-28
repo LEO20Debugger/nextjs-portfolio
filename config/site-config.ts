@@ -57,7 +57,7 @@ const GridItems: GridItemInterface[] = [
     type: "social",
     title: "Github",
     icon: "github",
-    username: "@LBrainergybyleo",
+    username: "@Brainergybyleo",
     buttonTitle: "Follow",
     buttonSecondaryText: "5",
     buttonLink: "https://github.com/LEO20Debugger",
@@ -79,7 +79,7 @@ const GridItems: GridItemInterface[] = [
     icon: "github",
     stars: 2,
     color: "#070707",
-    buttonLink: "https://github.com",
+    buttonLink: "https://brainergybyleo.vercel.app/",
   },
 ];
 
@@ -89,7 +89,7 @@ export const siteConfig = {
   bio: "Crafting unique & beautiful experiences, one line of code at a time.",
   location: "Remote",
   locationLink:
-    "https://www.google.com/maps/place/Kad%C4%B1k%C3%B6y%2F%C4%B0stanbul/@40.981133,29.063053,12z/data=!3m1!4b1!4m6!3m5!1s0x14cac790b17ba89d:0xd2d24ea0437a7ee2!8m2!3d40.981867!4d29.0576302!16zL20vMDV5cWY4?entry=ttu",
+    "https://www.google.com/maps/place/Ikeja,+Lagos/@6.5298498,3.1987083,11z/data=!3m1!4b1!4m6!3m5!1s0x103b9228fa2a3999:0xd7a8324bddbba1f0!8m2!3d6.601838!4d3.3514863!16zL20vMDJweGtx?authuser=0&entry=ttu",
   email: "leonard6oba@gmail.com",
   items: GridItems,
 } as const;

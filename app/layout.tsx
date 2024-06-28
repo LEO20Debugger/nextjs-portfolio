@@ -39,8 +39,8 @@ const sfPRO = localFont({
 });
 
 export const metadata = {
-  title: "makrdev",
-  description: "A create video tutorials for Next.js, Supabase and OpenAI.",
+  title: "leo",
+  description: "Bringing codes to life",
 };
 
 export default function RootLayout({
