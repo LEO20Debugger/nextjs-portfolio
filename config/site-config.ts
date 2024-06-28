@@ -66,7 +66,7 @@ const GridItems: GridItemInterface[] = [
   {
     layout: "2x1",
     type: "",
-    title: "brainergybyleo.dev(Nextjs) 🚀",
+    title: "brainergybyleo.dev(Nextjs)",
     icon: "github",
     color: "#070707",
     buttonLink: "https://brainergybyleo.vercel.app/",
