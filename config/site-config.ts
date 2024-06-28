@@ -66,7 +66,7 @@ const GridItems: GridItemInterface[] = [
   {
     layout: "2x1",
     type: "",
-    title: "brainergybyleo.dev",
+    title: "brainergybyleo",
     icon: "github",
     color: "#070707",
     buttonLink: "https://brainergybyleo.vercel.app/",
@@ -75,7 +75,7 @@ const GridItems: GridItemInterface[] = [
   {
     layout: "2x1",
     type: "project",
-    title: "(nextjs14)markdown blog",
+    title: "markdown blog",
     icon: "github",
     stars: 2,
     color: "#070707",
