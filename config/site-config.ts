@@ -69,7 +69,7 @@ const GridItems: GridItemInterface[] = [
     title: "brainergybyleo.dev",
     icon: "github",
     color: "#070707",
-    buttonLink: "https://github.com/LEO20Debugger/nextjs-portfolio",
+    buttonLink: "https://brainergybyleo.vercel.app/",
     stars: 5,
   },
   {
@@ -79,7 +79,7 @@ const GridItems: GridItemInterface[] = [
     icon: "github",
     stars: 2,
     color: "#070707",
-    buttonLink: "https://brainergybyleo.vercel.app/",
+    buttonLink: "https://github.com/LEO20Debugger/nextjs14-markdown-blog",
   },
 ];
 
