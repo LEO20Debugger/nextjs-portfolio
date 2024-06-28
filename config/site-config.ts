@@ -66,7 +66,7 @@ const GridItems: GridItemInterface[] = [
   {
     layout: "2x1",
     type: "project",
-    title: "Porfolio",
+    title: "brainergybyleo.dev",
     icon: "github",
     color: "#070707",
     buttonLink: "https://github.com/LEO20Debugger/nextjs-portfolio",
