@@ -1,5 +1,5 @@
-export type GridItemLayout = "1x2" | "2x1" | "2x2" | "2x4"; // First number is width, second is height
-export type GridItemType = "social" | "equipment" | "mentor" | "project";
+export type GridItemLayout = "1x2" | "2x1" | "2x2" | "2x4" | "4x2"; // First number is width, second is height
+export type GridItemType = "social" | "equipment" | "mentor" | "project" | "techstack";
 export type EqiupmentItem = {
   title: string;
   link: string;
@@ -22,6 +22,7 @@ export interface GridItemInterface {
   oldPrice?: string;
   /* Project */
   stars?: number;
+  websiteLink?: string;
   /* Equipments */
   equipments?: EqiupmentItem[];
   image?: string;
@@ -37,20 +38,19 @@ const GridItems: GridItemInterface[] = [
     buttonTitle: "Follow",
     buttonLink: "https://x.com/Brainergybyleo",
     buttonSecondaryText: "2,084",
-    color: "#1DA1F2",
+    color: "#000000",
     description:
       "Crafting unique & beautiful experiences, one line of code at a time.",
   },
   {
     layout: "1x2",
     type: "social",
-    title: "Discord",
-    icon: "discord",
-    username: "@Brainergybyleo",
-    buttonTitle: "Join",
-    buttonLink: "https://discord.com",
-    buttonSecondaryText: "5",
-    color: "#5865F2",
+    title: "LinkedIn",
+    icon: "linkedin",
+    username: "@brainergybyleo",
+    buttonTitle: "Connect",
+    buttonLink: "https://www.linkedin.com/in/brainergybyleo/",
+    color: "#0A66C2",
   },
   {
     layout: "1x2",
@@ -64,27 +64,35 @@ const GridItems: GridItemInterface[] = [
     color: "#070707",
   },
   {
-    layout: "2x1",
-    type: "project",
-    title: "brainergybyleo.dev",
-    icon: "github",
-    color: "#070707",
-    buttonLink: "https://github.com/LEO20Debugger/nextjs-portfolio/",
-    stars: 5,
+    layout: "4x2",
+    type: "techstack",
+    title: "Tech Stack",
   },
   {
     layout: "2x1",
     type: "project",
-    title: "markdown(nextjs14)blog",
+    title: "byte-me",
     icon: "github",
-    stars: 2,
     color: "#070707",
-    buttonLink: "https://github.com/LEO20Debugger/nextjs14-markdown-blog",
+    buttonLink: "https://github.com/LEO20Debugger/byte-me",
+    description: "A developer-focused app built with Next.js.",
+    stars: 0,
+  },
+  {
+    layout: "2x1",
+    type: "project",
+    title: "pradisedaypass",
+    icon: "github",
+    color: "#070707",
+    buttonLink: "https://github.com/LEO20Debugger/pradisedaypass",
+    websiteLink: "https://www.paradisedaypass.com/",
+    description: "Resort booking platform for day pass experiences.",
+    stars: 0,
   },
 ];
 
 export const siteConfig = {
-  creator: "Brainergybyleo",
+  creator: "Leonard Chibueze Oba",
   title: "Software Engineer",
   bio: "Crafting unique & beautiful experiences, one line of code at a time.",
   location: "Remote",

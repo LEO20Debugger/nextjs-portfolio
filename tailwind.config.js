@@ -32,7 +32,7 @@ module.exports = {
         1: "1rem",
       },
       boxShadow: {
-        grid: "0px 4px 10px 0px rgba(0, 0, 0, 0.05);",
+        grid: "0px 2px 8px 0px rgba(0, 0, 0, 0.08), 0px 8px 24px 0px rgba(0, 0, 0, 0.06)",
       },
     },
   },
