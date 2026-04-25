@@ -34,7 +34,7 @@ const LeftPanel = () => {
       <div>
         <div
           onClick={handleAvatarClick}
-          className="cursor-pointer select-none w-fit"
+          className="cursor-pointer select-none w-fit rounded-full overflow-hidden"
           title={clickCount >= 2 ? `${5 - clickCount} more...` : undefined}
         >
           <Image
