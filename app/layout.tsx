@@ -49,10 +49,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html className="h-full" lang="en" suppressHydrationWarning>
+    <html className="min-h-full" lang="en" suppressHydrationWarning>
       <body className={sfPRO.className}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          <div className="flex flex-col h-full">{children}</div>
+          <div className="flex flex-col min-h-full">{children}</div>
         </ThemeProvider>
       </body>
     </html>

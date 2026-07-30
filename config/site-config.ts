@@ -37,7 +37,6 @@ const GridItems: GridItemInterface[] = [
     username: "@Brainergybyleo",
     buttonTitle: "Follow",
     buttonLink: "https://x.com/Brainergybyleo",
-    buttonSecondaryText: "2,084",
     color: "#000000",
     description:
       "Crafting unique & beautiful experiences, one line of code at a time.",
@@ -59,7 +58,6 @@ const GridItems: GridItemInterface[] = [
     icon: "github",
     username: "@LEO20Debugger",
     buttonTitle: "Follow",
-    buttonSecondaryText: "5",
     buttonLink: "https://github.com/LEO20Debugger",
     color: "#070707",
   },
@@ -76,7 +74,6 @@ const GridItems: GridItemInterface[] = [
     color: "#070707",
     buttonLink: "https://github.com/LEO20Debugger/byte-me",
     description: "A developer-focused app built with Next.js.",
-    stars: 0,
   },
   {
     layout: "2x1",
@@ -87,7 +84,15 @@ const GridItems: GridItemInterface[] = [
     buttonLink: "https://github.com/LEO20Debugger/pradisedaypass",
     websiteLink: "https://www.paradisedaypass.com/",
     description: "Resort booking platform for day pass experiences.",
-    stars: 0,
+  },
+  {
+    layout: "2x1",
+    type: "project",
+    title: "felmosengineering",
+    icon: "felmos",
+    color: "#0F172A",
+    websiteLink: "https://www.felmosengineering.com/",
+    description: "Structural testing & civil engineering solutions platform.",
   },
 ];
 
@@ -99,5 +104,6 @@ export const siteConfig = {
   locationLink:
     "https://www.google.com/maps/place/Ikeja,+Lagos/@6.5298498,3.1987083,11z/data=!3m1!4b1!4m6!3m5!1s0x103b9228fa2a3999:0xd7a8324bddbba1f0!8m2!3d6.601838!4d3.3514863!16zL20vMDJweGtx?authuser=0&entry=ttu",
   email: "leonard6oba@gmail.com",
+  resumeUrl: "/resume.pdf",
   items: GridItems,
 } as const;

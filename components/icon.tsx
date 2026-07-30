@@ -153,6 +153,22 @@ const Icons: {
       </defs>
     </svg>
   ),
+  felmos: (
+    <svg
+      width="24"
+      height="24"
+      viewBox="0 0 64 64"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path d="M14 54 V40 H23 V54 Z" fill="white" />
+      <path d="M22 54 V13 L26 3 H33.5 V54 Z" fill="#F59E0B" />
+      <path d="M35 54 V23 H37 V54 Z" fill="#F59E0B" />
+      <path d="M45.5 54 V30 H50 V54 Z" fill="white" />
+      <path d="M38.5 54 V27 L41 24 H45.5 V54 Z" fill="#F59E0B" />
+      <path d="M6 58 L12 54 H52 L58 58 Z" fill="white" />
+    </svg>
+  ),
 };
 
 const Icon = ({ type, color = "#fff" }: { type: string; color?: string }) => {

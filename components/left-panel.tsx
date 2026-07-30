@@ -1,7 +1,7 @@
 "use client";
 import BackendEasterEgg from "@/components/backend-easter-egg";
 import { siteConfig } from "@/config/site-config";
-import { Mail, MapPin, MessageCircle } from "lucide-react";
+import { FileText, Mail, MapPin, MessageCircle } from "lucide-react";
 import Image from "next/image";
 import { useRef, useState } from "react";
 import Footer from "./footer";
@@ -27,7 +27,7 @@ const LeftPanel = () => {
   return (
     <div
       key="left-panel"
-      className="flex flex-col justify-between py-6 xl:max-w-sm xl:py-10 xl:h-full"
+      className="flex flex-col justify-between py-6 xl:max-w-sm xl:py-10 xl:h-screen xl:sticky xl:top-0 shrink-0"
     >
       <BackendEasterEgg trigger={trigger} />
       {/* Top Container */}
@@ -57,36 +57,52 @@ const LeftPanel = () => {
           <div className="text-xl font-medium text-primary">
             {siteConfig.title}
           </div>
-          <h1 className="mt-2 text-4xl font-bold">{siteConfig.creator}</h1>
+          <h1 className="mt-2 text-[clamp(1.15rem,5.5vw,2.25rem)] font-bold whitespace-nowrap tracking-tight">
+            {siteConfig.creator}
+          </h1>
           <p className="text-2xl font-light text-neutral-500">
             {siteConfig.bio}
           </p>
         </div>
         {/* Buttons Container */}
-        <div className="flex items-center gap-3 mt-6">
+        <div className="mt-6 flex flex-col gap-2.5">
           <a
-            href={`${siteConfig.locationLink}`}
-            className="flex items-center w-full gap-2 px-4 py-2 text-sm font-medium border rounded-md border-neutral-100 dark:border-neutral-800"
-          >
-            <MapPin size="14" />
-            {siteConfig.location}
-          </a>
-          <a
-            href={`mailto:${siteConfig.email}`}
-            className="flex items-center w-full gap-2 px-4 py-2 text-sm font-medium border rounded-md border-neutral-100 dark:border-neutral-800"
-          >
-            <Mail size="14" />
-            Mail
-          </a>
-          <a
-            href="https://wa.me/2349036538954"
+            href={siteConfig.resumeUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center w-full gap-2 px-4 py-2 text-sm font-medium border rounded-md border-neutral-100 dark:border-neutral-800"
+            download
+            className="flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-primary hover:opacity-90 rounded-lg shadow-sm transition-all"
           >
-            <MessageCircle size="14" />
-            WhatsApp
+            <FileText size="16" />
+            Download CV
           </a>
+          <div className="grid grid-cols-3 gap-2">
+            <a
+              href={`${siteConfig.locationLink}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium border rounded-md border-neutral-200 dark:border-neutral-800 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors"
+            >
+              <MapPin size="13" />
+              {siteConfig.location}
+            </a>
+            <a
+              href={`mailto:${siteConfig.email}`}
+              className="flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium border rounded-md border-neutral-200 dark:border-neutral-800 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors"
+            >
+              <Mail size="13" />
+              Mail
+            </a>
+            <a
+              href="https://wa.me/2349036538954"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium border rounded-md border-neutral-200 dark:border-neutral-800 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors"
+            >
+              <MessageCircle size="13" />
+              WhatsApp
+            </a>
+          </div>
         </div>
         {/* Footer */}
         <div className="hidden mt-6 xl:flex">
