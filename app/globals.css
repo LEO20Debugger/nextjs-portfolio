@@ -8,6 +8,12 @@
     @apply min-h-full antialiased dark:bg-neutral-950 dark:text-neutral-50 overflow-x-hidden;
   }
 
+  /* Keyboard focus — visible on both the white and neutral-900 card grounds,
+     and never shown for mouse users. */
+  :focus-visible {
+    @apply outline-none ring-2 ring-primary ring-offset-2 ring-offset-white dark:ring-offset-neutral-950 rounded-md;
+  }
+
   /* Custom Scrollbar */
   ::-webkit-scrollbar {
     width: 6px;

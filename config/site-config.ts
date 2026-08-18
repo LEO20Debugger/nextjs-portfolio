@@ -23,6 +23,8 @@ export interface GridItemInterface {
   /* Project */
   stars?: number;
   websiteLink?: string;
+  /** Key into `projectPreviews` in config/previews.ts */
+  previewImage?: string;
   /* Equipments */
   equipments?: EqiupmentItem[];
   image?: string;
@@ -73,7 +75,8 @@ const GridItems: GridItemInterface[] = [
     icon: "github",
     color: "#070707",
     buttonLink: "https://github.com/LEO20Debugger/byte-me",
-    description: "A developer-focused app built with Next.js.",
+    description: "A quirky CLI that spices up your terminal with geeky messages.",
+    previewImage: "byte-me",
   },
   {
     layout: "2x1",
@@ -84,6 +87,7 @@ const GridItems: GridItemInterface[] = [
     buttonLink: "https://github.com/LEO20Debugger/pradisedaypass",
     websiteLink: "https://www.paradisedaypass.com/",
     description: "Resort booking platform for day pass experiences.",
+    previewImage: "pradisedaypass",
   },
   {
     layout: "2x1",
@@ -93,10 +97,31 @@ const GridItems: GridItemInterface[] = [
     color: "#0F172A",
     websiteLink: "https://www.felmosengineering.com/",
     description: "Structural testing & civil engineering solutions platform.",
+    previewImage: "felmosengineering",
+  },
+  {
+    layout: "2x1",
+    type: "project",
+    title: "Muuv",
+    icon: "muuv",
+    color: "#C44A0A",
+    websiteLink: "https://themuuv.app/",
+    description: "Ride-hailing app — book a ride, track your driver in real time.",
+    previewImage: "muuv",
   },
 ];
 
+/**
+ * Canonical origin, used for metadata, OG tags, sitemap and JSON-LD.
+ * Set NEXT_PUBLIC_SITE_URL in the deployment environment — the fallback is only
+ * a placeholder and will produce wrong canonical URLs if left in place.
+ */
+export const siteUrl =
+  process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ??
+  "https://leonard-oba.vercel.app";
+
 export const siteConfig = {
+  url: siteUrl,
   creator: "Leonard Chibueze Oba",
   title: "Software Engineer",
   bio: "Crafting unique & beautiful experiences, one line of code at a time.",

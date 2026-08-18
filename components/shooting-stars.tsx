@@ -1,4 +1,5 @@
 "use client";
+import { usePrefersReducedMotion } from "@/hooks/use-media-query";
 import { useEffect, useRef } from "react";
 
 interface Star {
@@ -39,6 +40,7 @@ function createStar(width: number, height: number): Star {
 
 export default function ShootingStars() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const reduceMotion = usePrefersReducedMotion();
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -142,20 +144,58 @@ export default function ShootingStars() {
       animId = requestAnimationFrame(draw);
     }
 
-    resize();
-    spawnStars();
-    draw();
+    function drawStaticOnly() {
+      if (!canvas || !ctx) return;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const starColor = isDark() ? "255,255,255" : "99,102,241";
+      staticStars.forEach((s) => {
+        ctx.beginPath();
+        ctx.arc(s.x * canvas!.width, s.y * canvas!.height, s.r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(${starColor},${s.o})`;
+        ctx.fill();
+      });
+    }
 
-    window.addEventListener("resize", () => {
+    // Named so it can actually be removed — an inline arrow here would leak,
+    // since removeEventListener needs the same function reference.
+    function onResize() {
       resize();
+      if (reduceMotion) {
+        drawStaticOnly();
+      } else {
+        spawnStars();
+      }
+    }
+
+    function stop() {
+      cancelAnimationFrame(animId);
+    }
+
+    function onVisibility() {
+      if (reduceMotion) return;
+      if (document.hidden) stop();
+      else animId = requestAnimationFrame(draw);
+    }
+
+    resize();
+
+    if (reduceMotion) {
+      // Keep the starfield, drop the motion.
+      drawStaticOnly();
+    } else {
       spawnStars();
-    });
+      draw();
+      document.addEventListener("visibilitychange", onVisibility);
+    }
+
+    window.addEventListener("resize", onResize);
 
     return () => {
-      cancelAnimationFrame(animId);
-      window.removeEventListener("resize", resize);
+      stop();
+      window.removeEventListener("resize", onResize);
+      document.removeEventListener("visibilitychange", onVisibility);
     };
-  }, []);
+  }, [reduceMotion]);
 
   return (
     <canvas

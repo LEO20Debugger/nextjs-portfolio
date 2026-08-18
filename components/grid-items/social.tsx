@@ -5,7 +5,13 @@ import { GridItemInterface } from "./../../config/site-config";
 
 const Social = ({ item }: { item: GridItemInterface }) => {
   return (
-    <Link href={item.buttonLink ?? ""}>
+    <Link
+      href={item.buttonLink ?? ""}
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label={`${item.title} — ${item.username ?? ""}`.trim()}
+      className="group block rounded-xl"
+    >
       {/* Header */}
       <div className="flex items-center justify-between">
         {item.icon && <Icon type={item.icon} color={item.color ?? "#fff"} />}

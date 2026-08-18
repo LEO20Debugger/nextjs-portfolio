@@ -1,4 +1,5 @@
 "use client";
+import { usePrefersReducedMotion } from "@/hooks/use-media-query";
 import { useEffect, useRef, useState } from "react";
 
 const TECH = [
@@ -32,67 +33,150 @@ const TECH_CUSTOM: { name: string; color: string; svg: React.ReactNode }[] = [
   },
 ];
 
+const ALL_TECH: { name: string; color: string; slug?: string; svg?: React.ReactNode }[] = [
+  ...TECH.map((t) => ({ ...t, svg: undefined })),
+  ...TECH_CUSTOM.map((t) => ({ ...t, slug: undefined })),
+];
+
+const SIZE = 56;
+
 interface Ball {
   x: number;
   y: number;
   vx: number;
   vy: number;
-  tech: { name: string; color: string; slug?: string; svg?: React.ReactNode };
-  size: number;
 }
 
 export default function TechStack() {
   const containerRef = useRef<HTMLDivElement>(null);
+  const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
   const ballsRef = useRef<Ball[]>([]);
   const animRef = useRef<number>();
-  const [balls, setBalls] = useState<Ball[]>([]);
+  const reduceMotion = usePrefersReducedMotion();
+  // Chips are rendered once and then moved by writing transforms straight to
+  // the DOM — React is deliberately kept out of the animation loop. This single
+  // flag is the only state the loop ever touches.
+  const [placed, setPlaced] = useState(false);
 
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
 
-    const { width, height } = container.getBoundingClientRect();
-    const SIZE = 56;
+    // offsetWidth/Height report the LAYOUT box, unaffected by the card's
+    // reveal transform. getBoundingClientRect would return the scaled box
+    // (scale 0.2 mid-reveal) and cram every chip into a tiny region.
+    const { offsetWidth: width, offsetHeight: height } = container;
 
-    const ALL_TECH = [
-      ...TECH.map(t => ({ ...t, svg: undefined })),
-      ...TECH_CUSTOM.map(t => ({ ...t, slug: undefined })),
-    ];
+    ballsRef.current = ALL_TECH.map((_, i) => {
+      if (reduceMotion) {
+        // Static motionless grid — still shows every technology.
+        const cols = Math.max(1, Math.floor(width / (SIZE + 24)));
+        const col = i % cols;
+        const row = Math.floor(i / cols);
+        const gapX = width / cols;
+        return {
+          x: gapX * col + gapX / 2,
+          y: Math.min(height - SIZE / 2, SIZE / 2 + row * (SIZE + 28)),
+          vx: 0,
+          vy: 0,
+        };
+      }
+      // The card is a wide, short strip, so seed one evenly spaced row with
+      // vertical jitter. Pure random placement bunches chips into one corner
+      // and leaves half the card empty.
+      const lane = width / ALL_TECH.length;
+      return {
+        x: lane * (i + 0.5),
+        y: SIZE / 2 + Math.random() * Math.max(1, height - SIZE),
+        vx: (Math.random() > 0.5 ? 1 : -1) * (0.3 + Math.random() * 0.4),
+        vy: (Math.random() > 0.5 ? 1 : -1) * (0.3 + Math.random() * 0.4),
+      };
+    });
 
-    ballsRef.current = ALL_TECH.map((tech) => ({
-      tech,
-      size: SIZE,
-      x: SIZE + Math.random() * (width - SIZE * 2),
-      y: SIZE + Math.random() * (height - SIZE * 2),
-      vx: (Math.random() > 0.5 ? 1 : -1) * (0.3 + Math.random() * 0.4),
-      vy: (Math.random() > 0.5 ? 1 : -1) * (0.3 + Math.random() * 0.4),
-    }));
+    const paint = () => {
+      for (let i = 0; i < ballsRef.current.length; i++) {
+        const el = itemRefs.current[i];
+        if (!el) continue;
+        const b = ballsRef.current[i];
+        el.style.transform = `translate3d(${b.x - SIZE / 2}px, ${b.y - SIZE / 2}px, 0)`;
+      }
+    };
 
-    setBalls([...ballsRef.current]);
+    paint();
+    setPlaced(true);
 
-    function tick() {
-      const container = containerRef.current;
-      if (!container) return;
-      const { width, height } = container.getBoundingClientRect();
+    if (reduceMotion) return;
 
-      ballsRef.current = ballsRef.current.map((b) => {
-        let { x, y, vx, vy } = b;
-        x += vx;
-        y += vy;
-        if (x - b.size / 2 <= 0) { x = b.size / 2; vx = Math.abs(vx); }
-        if (x + b.size / 2 >= width) { x = width - b.size / 2; vx = -Math.abs(vx); }
-        if (y - b.size / 2 <= 0) { y = b.size / 2; vy = Math.abs(vy); }
-        if (y + b.size / 2 >= height) { y = height - b.size / 2; vy = -Math.abs(vy); }
-        return { ...b, x, y, vx, vy };
-      });
+    const tick = () => {
+      const el = containerRef.current;
+      if (!el) return;
+      const w = el.offsetWidth;
+      const h = el.offsetHeight;
 
-      setBalls([...ballsRef.current]);
+      for (const b of ballsRef.current) {
+        b.x += b.vx;
+        b.y += b.vy;
+        if (b.x - SIZE / 2 <= 0) { b.x = SIZE / 2; b.vx = Math.abs(b.vx); }
+        if (b.x + SIZE / 2 >= w) { b.x = w - SIZE / 2; b.vx = -Math.abs(b.vx); }
+        if (b.y - SIZE / 2 <= 0) { b.y = SIZE / 2; b.vy = Math.abs(b.vy); }
+        if (b.y + SIZE / 2 >= h) { b.y = h - SIZE / 2; b.vy = -Math.abs(b.vy); }
+      }
+
+      // Keep chips from stacking on top of each other: push any overlapping
+      // pair apart along their centre line and exchange the normal velocity.
+      const balls = ballsRef.current;
+      for (let i = 0; i < balls.length; i++) {
+        for (let j = i + 1; j < balls.length; j++) {
+          const a = balls[i];
+          const c = balls[j];
+          const dx = c.x - a.x;
+          const dy = c.y - a.y;
+          const dist = Math.hypot(dx, dy) || 0.001;
+          const minDist = SIZE * 0.92;
+          if (dist >= minDist) continue;
+
+          const nx = dx / dist;
+          const ny = dy / dist;
+          const push = (minDist - dist) / 2;
+          a.x -= nx * push;
+          a.y -= ny * push;
+          c.x += nx * push;
+          c.y += ny * push;
+
+          const rel = (c.vx - a.vx) * nx + (c.vy - a.vy) * ny;
+          if (rel < 0) {
+            a.vx += rel * nx;
+            a.vy += rel * ny;
+            c.vx -= rel * nx;
+            c.vy -= rel * ny;
+          }
+        }
+      }
+
+      paint();
       animRef.current = requestAnimationFrame(tick);
-    }
+    };
 
-    animRef.current = requestAnimationFrame(tick);
-    return () => { if (animRef.current) cancelAnimationFrame(animRef.current); };
-  }, []);
+    const start = () => {
+      if (animRef.current == null) animRef.current = requestAnimationFrame(tick);
+    };
+    const stop = () => {
+      if (animRef.current != null) {
+        cancelAnimationFrame(animRef.current);
+        animRef.current = undefined;
+      }
+    };
+
+    // Don't burn frames while the tab is in the background.
+    const onVisibility = () => (document.hidden ? stop() : start());
+
+    start();
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => {
+      stop();
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
+  }, [reduceMotion]);
 
   return (
     <div className="w-full h-full p-4 flex flex-col">
@@ -100,36 +184,40 @@ export default function TechStack() {
         Tech Stack
       </p>
       <div ref={containerRef} className="relative flex-1 w-full overflow-hidden rounded-2xl">
-        {balls.map((b) => (
+        {ALL_TECH.map((tech, i) => (
           <div
-            key={b.tech.name}
-            className="absolute flex flex-col items-center gap-1 select-none"
+            key={tech.name}
+            ref={(el) => {
+              itemRefs.current[i] = el;
+            }}
+            className="absolute left-0 top-0 flex flex-col items-center gap-1 select-none will-change-transform"
             style={{
-              width: b.size,
-              height: b.size + 18,
-              left: b.x - b.size / 2,
-              top: b.y - b.size / 2,
+              width: SIZE,
+              height: SIZE + 18,
+              opacity: placed ? 1 : 0,
+              transition: "opacity 250ms ease-out",
             }}
           >
             <div
               className="w-full flex items-center justify-center rounded-2xl shadow-grid border border-neutral-100 dark:border-neutral-700 bg-white dark:bg-neutral-800"
-              style={{ width: b.size, height: b.size, color: b.tech.color }}
+              style={{ width: SIZE, height: SIZE, color: tech.color }}
             >
-              {b.tech.svg ? (
-                <div className="w-7 h-7">{b.tech.svg}</div>
+              {tech.svg ? (
+                <div className="w-7 h-7">{tech.svg}</div>
               ) : (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
-                  src={`https://cdn.simpleicons.org/${b.tech.slug}/${b.tech.color.replace("#", "")}`}
-                  alt={b.tech.name}
+                  src={`https://cdn.simpleicons.org/${tech.slug}/${tech.color.replace("#", "")}`}
+                  alt={tech.name}
                   width={28}
                   height={28}
+                  loading="lazy"
                   style={{ width: 28, height: 28 }}
                 />
               )}
             </div>
             <span className="text-[9px] font-medium text-neutral-500 dark:text-neutral-400 whitespace-nowrap">
-              {b.tech.name}
+              {tech.name}
             </span>
           </div>
         ))}

@@ -33,6 +33,8 @@ module.exports = {
       },
       boxShadow: {
         grid: "0px 2px 8px 0px rgba(0, 0, 0, 0.08), 0px 8px 24px 0px rgba(0, 0, 0, 0.06)",
+        "grid-hover":
+          "0px 4px 12px 0px rgba(0, 0, 0, 0.10), 0px 16px 40px 0px rgba(0, 0, 0, 0.10)",
       },
     },
   },

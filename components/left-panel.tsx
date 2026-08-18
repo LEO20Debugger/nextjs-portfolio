@@ -32,25 +32,30 @@ const LeftPanel = () => {
       <BackendEasterEgg trigger={trigger} />
       {/* Top Container */}
       <div>
-        <div
+        <button
+          type="button"
           onClick={handleAvatarClick}
-          className="cursor-pointer select-none w-fit rounded-full overflow-hidden"
+          aria-label={`Portrait of ${siteConfig.creator}. Activate five times for a surprise.`}
+          className="cursor-pointer select-none w-fit rounded-full overflow-hidden block ring-offset-4 ring-offset-white dark:ring-offset-neutral-950 transition-shadow hover:shadow-grid-hover"
           title={clickCount >= 2 ? `${5 - clickCount} more...` : undefined}
         >
           <Image
             priority
             loading="eager"
-            alt="avatar"
+            alt=""
             placeholder="blur"
             src="/Leonard.jpeg"
             width={120}
             height={120}
             blurDataURL="/Leonard.jpeg"
-            className={`rounded-full transition-transform duration-100 ${
-              clickCount > 0 ? "scale-95" : "scale-100"
+            /* h-/w-[120px] match the width/height props: Tailwind preflight
+               sets `img { height: auto }`, which otherwise trips next/image's
+               "width or height modified, but not the other" warning. */
+            className={`h-[120px] w-[120px] rounded-full transition-transform duration-150 ease-out ${
+              clickCount > 0 ? "scale-95" : "scale-100 hover:scale-[1.03]"
             }`}
           />
-        </div>
+        </button>
 
         {/* Text Container */}
         <div className="mt-6">
@@ -71,9 +76,12 @@ const LeftPanel = () => {
             target="_blank"
             rel="noopener noreferrer"
             download
-            className="flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-primary hover:opacity-90 rounded-lg shadow-sm transition-all"
+            className="group flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-primary hover:brightness-110 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-primary/25 active:translate-y-0 rounded-lg shadow-sm transition-all duration-200 ease-out"
           >
-            <FileText size="16" />
+            <FileText
+              size="16"
+              className="transition-transform duration-200 ease-out group-hover:-translate-y-0.5"
+            />
             Download CV
           </a>
           <div className="grid grid-cols-3 gap-2">
@@ -81,14 +89,14 @@ const LeftPanel = () => {
               href={`${siteConfig.locationLink}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium border rounded-md border-neutral-200 dark:border-neutral-800 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors"
+              className="flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium border rounded-md border-neutral-200 dark:border-neutral-800 hover:bg-neutral-50 hover:border-neutral-300 hover:-translate-y-0.5 hover:shadow-sm active:translate-y-0 dark:hover:bg-neutral-800 dark:hover:border-neutral-600 transition-all duration-200 ease-out"
             >
               <MapPin size="13" />
               {siteConfig.location}
             </a>
             <a
               href={`mailto:${siteConfig.email}`}
-              className="flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium border rounded-md border-neutral-200 dark:border-neutral-800 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors"
+              className="flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium border rounded-md border-neutral-200 dark:border-neutral-800 hover:bg-neutral-50 hover:border-neutral-300 hover:-translate-y-0.5 hover:shadow-sm active:translate-y-0 dark:hover:bg-neutral-800 dark:hover:border-neutral-600 transition-all duration-200 ease-out"
             >
               <Mail size="13" />
               Mail
@@ -97,7 +105,7 @@ const LeftPanel = () => {
               href="https://wa.me/2349036538954"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium border rounded-md border-neutral-200 dark:border-neutral-800 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors"
+              className="flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium border rounded-md border-neutral-200 dark:border-neutral-800 hover:bg-neutral-50 hover:border-neutral-300 hover:-translate-y-0.5 hover:shadow-sm active:translate-y-0 dark:hover:bg-neutral-800 dark:hover:border-neutral-600 transition-all duration-200 ease-out"
             >
               <MessageCircle size="13" />
               WhatsApp

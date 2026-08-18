@@ -153,6 +153,25 @@ const Icons: {
       </defs>
     </svg>
   ),
+  // Steering wheel — a ride-hailing mark rather than a redrawn brand logo.
+  muuv: (
+    <svg
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <circle cx="12" cy="12" r="9" stroke="white" strokeWidth="2" />
+      <circle cx="12" cy="12" r="2.75" fill="white" />
+      <path
+        d="M12 3.4V9.25M4.1 15.2L9.6 13.4M19.9 15.2L14.4 13.4"
+        stroke="white"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+    </svg>
+  ),
   felmos: (
     <svg
       width="24"
