@@ -23,14 +23,32 @@ const Project = ({ item }: { item: GridItemInterface }) => {
   const showFloating = Boolean(preview) && hasHover;
 
   return (
+    /* Touch: stacked media card — full-width preview above the text, so the
+       image gets the whole card width instead of competing with the title for
+       it. Pointer devices keep the original compact row (no inline thumbnail
+       there at all, since the preview follows the cursor instead). */
     <div
-      className="flex items-center justify-between gap-4"
+      className="flex h-full flex-col gap-3 [@media(hover:hover)_and_(pointer:fine)]:h-auto [@media(hover:hover)_and_(pointer:fine)]:flex-row [@media(hover:hover)_and_(pointer:fine)]:items-center [@media(hover:hover)_and_(pointer:fine)]:justify-between [@media(hover:hover)_and_(pointer:fine)]:gap-4"
       onPointerEnter={showFloating ? handleEnter : undefined}
       onPointerLeave={showFloating ? () => setActive(false) : undefined}
     >
+      {preview && (
+        <div className="relative w-full min-h-0 flex-1 overflow-hidden rounded-xl border border-neutral-200 dark:border-neutral-700 [@media(hover:hover)_and_(pointer:fine)]:hidden">
+          <Image
+            src={preview}
+            alt={`${item.title} preview`}
+            fill
+            sizes="(min-width: 768px) 50vw, 100vw"
+            placeholder="blur"
+            className="object-cover object-top"
+          />
+        </div>
+      )}
+
+      <div className="flex items-center gap-4 [@media(hover:hover)_and_(pointer:fine)]:w-full [@media(hover:hover)_and_(pointer:fine)]:justify-between">
       {item.icon && <Icon type={item.icon} color={item.color} />}
       <div className="w-full min-w-0">
-        <div className="@lg:text-lg font-semibold">{item.title}</div>
+        <div className="@lg:text-lg font-semibold truncate">{item.title}</div>
         {item.description && (
           <div className="text-xs text-neutral-500 line-clamp-1">{item.description}</div>
         )}
@@ -62,32 +80,13 @@ const Project = ({ item }: { item: GridItemInterface }) => {
         )}
       </div>
 
-      {/* Touch devices get no hover, so the preview shows inline instead.
-          Hidden via CSS rather than JS: a media query can't be evaluated
-          during SSR, so gating this on `hasHover` would render thumbnails on
-          the server and then rip them out at hydration — a flash and layout
-          shift on every desktop load. The query must stay identical to the
-          one in useHasHover, or a device could match neither branch and get
-          no preview at all. */}
-      {preview && (
-        <div className="relative w-20 shrink-0 overflow-hidden rounded-lg border aspect-video border-neutral-200 dark:border-neutral-700 [@media(hover:hover)_and_(pointer:fine)]:hidden">
-          <Image
-            src={preview}
-            alt={`${item.title} preview`}
-            fill
-            sizes="80px"
-            placeholder="blur"
-            className="object-cover object-top"
-          />
-        </div>
-      )}
-
       {Boolean(item.stars && item.stars > 0) && (
         <div className="flex items-center gap-1 shrink-0 text-xs text-neutral-500">
           <div className="mt-[1px]">{item.stars}</div>
           <Star fill="currentColor" size={16} />
         </div>
       )}
+      </div>
 
       {showFloating && preview && (
         <ProjectPreview
