@@ -38,7 +38,12 @@ const ALL_TECH: { name: string; color: string; slug?: string; svg?: React.ReactN
   ...TECH_CUSTOM.map((t) => ({ ...t, slug: undefined })),
 ];
 
-const SIZE = 56;
+const SIZE_WIDE = 56;
+const SIZE_NARROW = 42;
+/** Above this share of the card's area, chips can't be separated without
+ *  jitter — there simply isn't room — so collision is switched off and they
+ *  drift through each other instead. */
+const MAX_PACKING = 0.34;
 
 interface Ball {
   x: number;
@@ -57,6 +62,10 @@ export default function TechStack() {
   // the DOM — React is deliberately kept out of the animation loop. This single
   // flag is the only state the loop ever touches.
   const [placed, setPlaced] = useState(false);
+  // Chip size adapts to the card: phones get a smaller chip so nine of them
+  // aren't fighting over ~330px of width.
+  const [size, setSize] = useState(SIZE_WIDE);
+  const collideRef = useRef(true);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -67,16 +76,24 @@ export default function TechStack() {
     // (scale 0.2 mid-reveal) and cram every chip into a tiny region.
     const { offsetWidth: width, offsetHeight: height } = container;
 
+    // Narrow cards (phones) get smaller chips, and if the chips still can't
+    // fit comfortably we let them pass through each other rather than shove
+    // each other around in a space that was never big enough.
+    const S = width < 460 ? SIZE_NARROW : SIZE_WIDE;
+    const packing = (ALL_TECH.length * S * S) / Math.max(1, width * height);
+    collideRef.current = packing <= MAX_PACKING;
+    setSize(S);
+
     ballsRef.current = ALL_TECH.map((_, i) => {
       if (reduceMotion) {
         // Static motionless grid — still shows every technology.
-        const cols = Math.max(1, Math.floor(width / (SIZE + 24)));
+        const cols = Math.max(1, Math.floor(width / (S + 24)));
         const col = i % cols;
         const row = Math.floor(i / cols);
         const gapX = width / cols;
         return {
           x: gapX * col + gapX / 2,
-          y: Math.min(height - SIZE / 2, SIZE / 2 + row * (SIZE + 28)),
+          y: Math.min(height - S / 2, S / 2 + row * (S + 28)),
           vx: 0,
           vy: 0,
         };
@@ -87,7 +104,7 @@ export default function TechStack() {
       const lane = width / ALL_TECH.length;
       return {
         x: lane * (i + 0.5),
-        y: SIZE / 2 + Math.random() * Math.max(1, height - SIZE),
+        y: S / 2 + Math.random() * Math.max(1, height - S),
         vx: (Math.random() > 0.5 ? 1 : -1) * (0.3 + Math.random() * 0.4),
         vy: (Math.random() > 0.5 ? 1 : -1) * (0.3 + Math.random() * 0.4),
       };
@@ -98,7 +115,7 @@ export default function TechStack() {
         const el = itemRefs.current[i];
         if (!el) continue;
         const b = ballsRef.current[i];
-        el.style.transform = `translate3d(${b.x - SIZE / 2}px, ${b.y - SIZE / 2}px, 0)`;
+        el.style.transform = `translate3d(${b.x - S / 2}px, ${b.y - S / 2}px, 0)`;
       }
     };
 
@@ -116,15 +133,16 @@ export default function TechStack() {
       for (const b of ballsRef.current) {
         b.x += b.vx;
         b.y += b.vy;
-        if (b.x - SIZE / 2 <= 0) { b.x = SIZE / 2; b.vx = Math.abs(b.vx); }
-        if (b.x + SIZE / 2 >= w) { b.x = w - SIZE / 2; b.vx = -Math.abs(b.vx); }
-        if (b.y - SIZE / 2 <= 0) { b.y = SIZE / 2; b.vy = Math.abs(b.vy); }
-        if (b.y + SIZE / 2 >= h) { b.y = h - SIZE / 2; b.vy = -Math.abs(b.vy); }
+        if (b.x - S / 2 <= 0) { b.x = S / 2; b.vx = Math.abs(b.vx); }
+        if (b.x + S / 2 >= w) { b.x = w - S / 2; b.vx = -Math.abs(b.vx); }
+        if (b.y - S / 2 <= 0) { b.y = S / 2; b.vy = Math.abs(b.vy); }
+        if (b.y + S / 2 >= h) { b.y = h - S / 2; b.vy = -Math.abs(b.vy); }
       }
 
       // Keep chips from stacking on top of each other: push any overlapping
       // pair apart along their centre line and exchange the normal velocity.
-      const balls = ballsRef.current;
+      // Skipped when the card is too tightly packed to separate them.
+      const balls = collideRef.current ? ballsRef.current : [];
       for (let i = 0; i < balls.length; i++) {
         for (let j = i + 1; j < balls.length; j++) {
           const a = balls[i];
@@ -132,7 +150,7 @@ export default function TechStack() {
           const dx = c.x - a.x;
           const dy = c.y - a.y;
           const dist = Math.hypot(dx, dy) || 0.001;
-          const minDist = SIZE * 0.92;
+          const minDist = S * 0.92;
           if (dist >= minDist) continue;
 
           const nx = dx / dist;
@@ -192,15 +210,15 @@ export default function TechStack() {
             }}
             className="absolute left-0 top-0 flex flex-col items-center gap-1 select-none will-change-transform"
             style={{
-              width: SIZE,
-              height: SIZE + 18,
+              width: size,
+              height: size + 18,
               opacity: placed ? 1 : 0,
               transition: "opacity 250ms ease-out",
             }}
           >
             <div
               className="w-full flex items-center justify-center rounded-2xl shadow-grid border border-neutral-100 dark:border-neutral-700 bg-white dark:bg-neutral-800"
-              style={{ width: SIZE, height: SIZE, color: tech.color }}
+              style={{ width: size, height: size, color: tech.color }}
             >
               {tech.svg ? (
                 <div className="w-7 h-7">{tech.svg}</div>

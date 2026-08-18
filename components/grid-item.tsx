@@ -13,8 +13,10 @@ const variants = cva(
         "2x2": "md:col-span-2 col-span-full row-span-2 md:p-8 p-4",
         "2x4":
           "md:col-span-2 col-span-full row-span-4 relative overflow-hidden",
+        // Taller on phones: nine tech chips in a two-row-high card is far too
+        // dense, so they spend the whole time shoving each other around.
         "4x2":
-          "col-span-full row-span-2 relative overflow-hidden",
+          "col-span-full row-span-3 md:row-span-2 relative overflow-hidden",
       },
     },
     defaultVariants: {
