@@ -11,7 +11,8 @@ import Footer from "./footer";
 import Sharingan from "./sharingan";
 
 const HOLD_MS = 1000;
-const SHARINGAN_MS = 3200;
+// Long enough to breathe: lids open, hold, blink, hold, lids close.
+const SHARINGAN_MS = 4400;
 
 const LeftPanel = () => {
   const [clickCount, setClickCount] = useState(0);
@@ -118,6 +119,7 @@ const LeftPanel = () => {
             active={sharingan}
             holding={longPress.holding}
             holdDuration={HOLD_MS}
+            durationMs={SHARINGAN_MS}
           />
         </button>
 

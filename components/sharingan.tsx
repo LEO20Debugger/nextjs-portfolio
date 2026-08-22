@@ -1,11 +1,72 @@
 "use client";
 import { usePrefersReducedMotion } from "@/hooks/use-media-query";
 import { AnimatePresence, motion } from "framer-motion";
+import { useEffect, useState } from "react";
 
 /**
  * Overlays the (already circular) avatar so the photo itself becomes the iris.
  * Deliberately unlabelled — no character or series name anywhere in the UI.
  */
+
+type LidStage = "shut" | "open" | "blink";
+
+/** Vertical aperture of the lid, as a scaleY factor. */
+const LID_APERTURE: Record<LidStage, number> = {
+  shut: 0,
+  open: 1,
+  blink: 0.12,
+};
+
+/**
+ * A tear of blood welling under the iris and running to the jaw. Two trails of
+ * different lengths and timings — a single centred drip reads as a mistake.
+ */
+const BloodTear = ({ durationMs }: { durationMs: number }) => {
+  const seconds = durationMs / 1000;
+
+  return (
+    // viewBox runs to 180 while the avatar occupies 0–100: the tear starts at
+    // the lower lid and escapes the circle, running onto the page below.
+    // h-[180%] so one viewBox unit still equals one avatar unit: at h-full the
+    // 180-tall box would be squashed into the circle and the tear would never
+    // leave it.
+    <svg
+      viewBox="0 0 100 180"
+      className="absolute left-0 top-0 h-[180%] w-full overflow-visible"
+    >
+      {[
+        { d: "M50,74 C52,96 53.5,124 51,164", width: 3.4, delay: 0.16 },
+        { d: "M43,78 C42,94 41.5,108 42.5,124", width: 2, delay: 0.3 },
+      ].map((trail, i) => (
+        <motion.path
+          key={i}
+          d={trail.d}
+          fill="none"
+          stroke="#6d0410"
+          strokeWidth={trail.width}
+          strokeLinecap="round"
+          initial={{ pathLength: 0, opacity: 0 }}
+          animate={{ pathLength: [0, 0, 1, 1], opacity: [0, 0.95, 0.95, 0] }}
+          transition={{
+            duration: seconds,
+            times: [0, trail.delay, trail.delay + 0.3, 1],
+            ease: "easeOut",
+          }}
+        />
+      ))}
+
+      {/* The bead at the head of the main trail. */}
+      <motion.circle
+        r="3.8"
+        cx="51"
+        fill="#8a0714"
+        initial={{ opacity: 0, cy: 74 }}
+        animate={{ opacity: [0, 1, 1, 0], cy: [74, 76, 164, 164] }}
+        transition={{ duration: seconds, times: [0, 0.16, 0.5, 0.66], ease: "easeIn" }}
+      />
+    </svg>
+  );
+};
 
 /**
  * One comma-shaped tomoe: a round head plus a tapering tail. Drawn as two
@@ -49,13 +110,34 @@ const SharinganEye = ({ spin }: { spin: boolean }) => (
 
 type Props = {
   active: boolean;
-  /** 0–1 charge while the user is holding, drawn as a filling ring. */
+  /** True while the user is holding, drawn as a filling ring. */
   holding: boolean;
   holdDuration: number;
+  /** Must match the caller's dismiss timer — the lids close on its last frame. */
+  durationMs: number;
 };
 
-const Sharingan = ({ active, holding, holdDuration }: Props) => {
+const Sharingan = ({ active, holding, holdDuration, durationMs }: Props) => {
   const reduceMotion = usePrefersReducedMotion();
+  const [stage, setStage] = useState<LidStage>("shut");
+
+  // Four state changes across the whole reveal — the lid animation itself is
+  // handled by the compositor, not by re-rendering.
+  useEffect(() => {
+    if (!active) {
+      setStage("shut");
+      return;
+    }
+    const blinkAt = durationMs * 0.5;
+    const timers = [
+      setTimeout(() => setStage("open"), 60),
+      setTimeout(() => setStage("blink"), blinkAt),
+      setTimeout(() => setStage("open"), blinkAt + 220),
+      setTimeout(() => setStage("shut"), durationMs - 430),
+    ];
+    return () => timers.forEach(clearTimeout);
+  }, [active, durationMs]);
+
 
   return (
     <>
@@ -89,10 +171,10 @@ const Sharingan = ({ active, holding, holdDuration }: Props) => {
         {active && (
           <motion.div
             aria-hidden
-            initial={{ opacity: 0, scale: 1.35 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 1.1 }}
-            transition={{ duration: reduceMotion ? 0 : 0.45, ease: "easeOut" }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: reduceMotion ? 0 : 0.25, ease: "easeOut" }}
             className="pointer-events-none absolute inset-0 z-10 overflow-hidden rounded-full"
           >
             {/* No mix-blend-mode anywhere in here: this wrapper animates
@@ -100,6 +182,21 @@ const Sharingan = ({ active, holding, holdDuration }: Props) => {
                 from the photo below. The photo is tinted by a CSS filter on the
                 <img> itself (see LeftPanel); these are plain alpha layers. */}
 
+            {/* The eyelid.
+                NOT clip-path: framer-motion 10 animates clip-path exactly once
+                and then ignores later changes — verified by instrumenting the
+                stage machine, which cycled correctly while the aperture stayed
+                pinned at 50%. scaleY is a transform, so it re-animates every
+                time, and the vertical squash is how a real eye opens anyway. */}
+            <motion.div
+              className="absolute inset-0 origin-center"
+              initial={{ scaleY: 0 }}
+              animate={{ scaleY: reduceMotion ? 1 : LID_APERTURE[stage] }}
+              transition={{
+                duration: reduceMotion ? 0 : stage === "blink" ? 0.1 : 0.4,
+                ease: "easeOut",
+              }}
+            >
             {/* 1. Iris depth — darkens toward the limbus. */}
             <div
               className="absolute inset-0"
@@ -122,7 +219,25 @@ const Sharingan = ({ active, holding, holdDuration }: Props) => {
             )}
             {/* 3. Crisp black geometry on top of all the tinting. */}
             <SharinganEye spin={!reduceMotion} />
+            </motion.div>
           </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Blood tear. Deliberately a sibling of the clipped iris wrapper: inside
+          it, the rounded-full clip would shear the tear off at the avatar's
+          edge instead of letting it run down onto the page. */}
+      <AnimatePresence>
+        {active && !reduceMotion && (
+          <motion.div
+            aria-hidden
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            className="pointer-events-none absolute inset-0 z-[15]"
+          >
+            <BloodTear durationMs={durationMs} /></motion.div>
         )}
       </AnimatePresence>
 
