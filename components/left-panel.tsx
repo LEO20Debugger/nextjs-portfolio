@@ -74,8 +74,15 @@ const LeftPanel = () => {
           type="button"
           onClick={handleAvatarClick}
           {...longPress.handlers}
+          /* Long-press on an image otherwise raises the OS "save image"
+             callout, which steals the gesture before the hold completes. */
+          onContextMenu={(event) => event.preventDefault()}
           aria-label={`Portrait of ${siteConfig.creator}. Activate five times for a surprise, or press and hold for another.`}
-          className="relative cursor-pointer select-none w-fit rounded-full block ring-offset-4 ring-offset-white dark:ring-offset-neutral-950 transition-shadow hover:shadow-grid-hover"
+          /* touch-pan-y: the browser would treat a press as a possible scroll
+             and fire pointercancel, aborting the hold. Restricting it to
+             vertical panning means a still finger never cancels, while a real
+             swipe from the avatar still scrolls the page. */
+          className="relative cursor-pointer select-none touch-pan-y [-webkit-touch-callout:none] w-fit rounded-full block ring-offset-4 ring-offset-white dark:ring-offset-neutral-950 transition-shadow hover:shadow-grid-hover"
           title={clickCount >= 2 ? `${5 - clickCount} more...` : undefined}
         >
           <Image
@@ -87,6 +94,10 @@ const LeftPanel = () => {
             width={120}
             height={120}
             blurDataURL="/Leonard.jpeg"
+            /* The <img> must not receive the gesture itself: dragging it or
+               long-pressing it are both native image behaviours. Let every
+               pointer event land on the button instead. */
+            draggable={false}
             /* Filtering the image itself is what keeps the photo readable
                through the crimson — sepia sets a warm base, the hue rotation
                drags it to red, saturate pushes it to blood. */
@@ -99,7 +110,7 @@ const LeftPanel = () => {
             /* h-/w-[120px] match the width/height props: Tailwind preflight
                sets `img { height: auto }`, which otherwise trips next/image's
                "width or height modified, but not the other" warning. */
-            className={`h-[120px] w-[120px] rounded-full transition-transform duration-150 ease-out ${
+            className={`h-[120px] w-[120px] rounded-full pointer-events-none select-none transition-transform duration-150 ease-out ${
               clickCount > 0 ? "scale-95" : "scale-100 hover:scale-[1.03]"
             }`}
           />
