@@ -1,3 +1,4 @@
+import EffectsOverlay from "@/components/effects-overlay";
 import Footer from "@/components/footer";
 import LeftPanel from "@/components/left-panel";
 import RightPanel from "@/components/right-panel";
@@ -8,6 +9,8 @@ export default function Home() {
     <main className="relative flex flex-col items-center flex-1 w-full min-h-screen overflow-x-hidden">
       {/* Shooting stars (dark mode only) */}
       <ShootingStars />
+      {/* Full-screen easter-egg atmosphere (listens on the effect bus) */}
+      <EffectsOverlay />
       {/* Pattern */}
       <div className="absolute inset-0 z-0 bg-light-pattern dark:bg-dark-pattern bg-verySmall" />
       {/* Overlay */}

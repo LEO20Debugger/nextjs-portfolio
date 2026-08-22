@@ -1,5 +1,6 @@
 "use client";
 import { usePrefersReducedMotion } from "@/hooks/use-media-query";
+import { onEffect } from "@/utils/effects";
 import { useEffect, useRef } from "react";
 
 interface Star {
@@ -41,6 +42,11 @@ function createStar(width: number, height: number): Star {
 export default function ShootingStars() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const reduceMotion = usePrefersReducedMotion();
+  // Read by the draw loop every frame, so the colour can change mid-animation
+  // without tearing down and restarting the canvas.
+  const crimsonRef = useRef(false);
+
+  useEffect(() => onEffect("sharingan", (d) => { crimsonRef.current = d.active; }), []);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -87,7 +93,7 @@ export default function ShootingStars() {
 
       const dark = isDark();
       // In light mode use a soft indigo/slate, in dark mode use white
-      const starColor = dark ? "255,255,255" : "99,102,241";
+      const starColor = crimsonRef.current ? "255,45,45" : dark ? "255,255,255" : "99,102,241";
 
       // Static background stars
       staticStars.forEach((s) => {
@@ -147,7 +153,7 @@ export default function ShootingStars() {
     function drawStaticOnly() {
       if (!canvas || !ctx) return;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      const starColor = isDark() ? "255,255,255" : "99,102,241";
+      const starColor = crimsonRef.current ? "255,45,45" : isDark() ? "255,255,255" : "99,102,241";
       staticStars.forEach((s) => {
         ctx.beginPath();
         ctx.arc(s.x * canvas!.width, s.y * canvas!.height, s.r, 0, Math.PI * 2);

@@ -1,17 +1,53 @@
 "use client";
 import BackendEasterEgg from "@/components/backend-easter-egg";
 import { siteConfig } from "@/config/site-config";
+import { useLongPress } from "@/hooks/use-long-press";
+import { requestMotionPermission } from "@/hooks/use-shake";
+import { emitEffect } from "@/utils/effects";
 import { FileText, Mail, MapPin, MessageCircle } from "lucide-react";
 import Image from "next/image";
-import { useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Footer from "./footer";
+import Sharingan from "./sharingan";
+
+const HOLD_MS = 1000;
+const SHARINGAN_MS = 3200;
 
 const LeftPanel = () => {
   const [clickCount, setClickCount] = useState(0);
   const [trigger, setTrigger] = useState(0);
+  const [sharingan, setSharingan] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const sharinganTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const activateSharingan = useCallback(() => {
+    setSharingan(true);
+    emitEffect("sharingan", true);
+
+    // The hold is a real user gesture, which is the only moment iOS will let us
+    // ask for motion access — so unlocking shake rides along with the reveal.
+    void requestMotionPermission();
+
+    if (sharinganTimer.current) clearTimeout(sharinganTimer.current);
+    sharinganTimer.current = setTimeout(() => {
+      setSharingan(false);
+      emitEffect("sharingan", false);
+    }, SHARINGAN_MS);
+  }, []);
+
+  useEffect(
+    () => () => {
+      if (sharinganTimer.current) clearTimeout(sharinganTimer.current);
+    },
+    []
+  );
+
+  const longPress = useLongPress(activateSharingan, HOLD_MS);
 
   const handleAvatarClick = () => {
+    // A completed hold also produces a click; don't let it feed the counter.
+    if (longPress.consumeFired()) return;
+
     const next = clickCount + 1;
     setClickCount(next);
 
@@ -32,11 +68,14 @@ const LeftPanel = () => {
       <BackendEasterEgg trigger={trigger} />
       {/* Top Container */}
       <div>
+        {/* Not overflow-hidden: the sharingan glow has to bleed past the circle.
+            The photo is clipped by its own rounded-full instead. */}
         <button
           type="button"
           onClick={handleAvatarClick}
-          aria-label={`Portrait of ${siteConfig.creator}. Activate five times for a surprise.`}
-          className="cursor-pointer select-none w-fit rounded-full overflow-hidden block ring-offset-4 ring-offset-white dark:ring-offset-neutral-950 transition-shadow hover:shadow-grid-hover"
+          {...longPress.handlers}
+          aria-label={`Portrait of ${siteConfig.creator}. Activate five times for a surprise, or press and hold for another.`}
+          className="relative cursor-pointer select-none w-fit rounded-full block ring-offset-4 ring-offset-white dark:ring-offset-neutral-950 transition-shadow hover:shadow-grid-hover"
           title={clickCount >= 2 ? `${5 - clickCount} more...` : undefined}
         >
           <Image
@@ -48,12 +87,26 @@ const LeftPanel = () => {
             width={120}
             height={120}
             blurDataURL="/Leonard.jpeg"
+            /* Filtering the image itself is what keeps the photo readable
+               through the crimson — sepia sets a warm base, the hue rotation
+               drags it to red, saturate pushes it to blood. */
+            style={{
+              filter: sharingan
+                ? "grayscale(1) sepia(1) hue-rotate(-38deg) saturate(5.5) contrast(1.15) brightness(0.82)"
+                : undefined,
+              transition: "filter 450ms ease-out",
+            }}
             /* h-/w-[120px] match the width/height props: Tailwind preflight
                sets `img { height: auto }`, which otherwise trips next/image's
                "width or height modified, but not the other" warning. */
             className={`h-[120px] w-[120px] rounded-full transition-transform duration-150 ease-out ${
               clickCount > 0 ? "scale-95" : "scale-100 hover:scale-[1.03]"
             }`}
+          />
+          <Sharingan
+            active={sharingan}
+            holding={longPress.holding}
+            holdDuration={HOLD_MS}
           />
         </button>
 
