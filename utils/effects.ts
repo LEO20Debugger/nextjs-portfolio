@@ -1,15 +1,11 @@
 /**
- * Tiny typed event bus for the full-screen easter-egg effects.
- *
- * The trigger (the avatar, inside LeftPanel) and the overlays that react to it
- * (the page vignette, the star canvas) are siblings under a *server* component,
- * so there's no shared client parent to hold state and no way to prop-drill.
- * A pair of window events is less machinery than introducing a client provider
- * around the whole page just to pass one boolean.
+ * Typed event bus for full-screen easter-egg effects (e.g. Chidori on device shake).
  */
-export type EffectName = "sharingan" | "chidori";
+export type EffectName = "chidori";
 
-export type EffectDetail = { active: boolean };
+export type EffectDetail = {
+  active: boolean;
+};
 
 const key = (name: EffectName) => `leo:${name}`;
 
