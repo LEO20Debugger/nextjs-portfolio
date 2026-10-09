@@ -1,7 +1,8 @@
 /**
- * Typed event bus for full-screen easter-egg effects (e.g. Chidori on device shake).
+ * Typed event bus for full-screen easter-egg effects (e.g. Chidori on device
+ * shake, or opening the terminal from the footer chip).
  */
-export type EffectName = "chidori";
+export type EffectName = "chidori" | "terminal";
 
 export type EffectDetail = {
   active: boolean;

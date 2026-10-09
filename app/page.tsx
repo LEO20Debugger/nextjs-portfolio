@@ -3,6 +3,7 @@ import Footer from "@/components/footer";
 import LeftPanel from "@/components/left-panel";
 import RightPanel from "@/components/right-panel";
 import ShootingStars from "@/components/shooting-stars";
+import Terminal from "@/components/terminal";
 
 export default function Home() {
   return (
@@ -11,6 +12,8 @@ export default function Home() {
       <ShootingStars />
       {/* Full-screen easter-egg atmosphere (listens on the effect bus) */}
       <EffectsOverlay />
+      {/* Hidden terminal: backtick to open, or the footer chip on touch */}
+      <Terminal />
       {/* Pattern */}
       <div className="absolute inset-0 z-0 bg-light-pattern dark:bg-dark-pattern bg-verySmall" />
       {/* Overlay */}
