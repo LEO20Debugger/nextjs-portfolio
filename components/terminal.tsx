@@ -2,7 +2,7 @@
 import { siteConfig } from "@/config/site-config";
 import { usePrefersReducedMotion } from "@/hooks/use-media-query";
 import { onEffect } from "@/utils/effects";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, useDragControls } from "framer-motion";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { DANCE_FRAMES, NEOFETCH_LOGO } from "./terminal-art";
 
@@ -37,6 +37,10 @@ const Terminal = () => {
 
   const inputRef = useRef<HTMLInputElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+  // Drag is started from the title bar only, so selecting text in the
+  // scrollback doesn't move the window.
+  const dragControls = useDragControls();
+  const boundsRef = useRef<HTMLDivElement>(null);
   // Shell history, walked with the arrow keys like a real prompt.
   const history = useRef<string[]>([]);
   const historyIndex = useRef<number>(-1);
@@ -193,9 +197,19 @@ const Terminal = () => {
             push([{ text: `open: no link for ${match.title}`, tone: "err" }, { text: "" }]);
             break;
           }
-          // Called straight from the Enter keypress, so popup blockers allow it.
-          window.open(href, "_blank", "noopener,noreferrer");
-          push([{ text: `opening ${href} ...`, tone: "accent" }, { text: "" }]);
+          // Called straight from the Enter keypress, so popup blockers should
+          // allow it — but if one doesn't, say so instead of claiming success
+          // and doing nothing.
+          const win = window.open(href, "_blank", "noopener,noreferrer");
+          push(
+            win
+              ? [{ text: `opening ${href} ...`, tone: "accent" }, { text: "" }]
+              : [
+                  { text: "open: blocked by the browser", tone: "err" },
+                  { text: href, tone: "accent" },
+                  { text: "" },
+                ]
+          );
           break;
         }
 
@@ -293,25 +307,42 @@ const Terminal = () => {
   return (
     <AnimatePresence>
       {open && (
-        <motion.div
-          initial={{ y: "100%" }}
-          animate={{ y: 0 }}
-          exit={{ y: "100%" }}
-          transition={{
-            duration: reduceMotion ? 0 : 0.32,
-            ease: [0.22, 1, 0.36, 1],
-          }}
-          className="fixed inset-x-0 bottom-0 z-[60] px-0 sm:px-4"
-          role="dialog"
-          aria-label="Interactive terminal"
+        /* Full-viewport bounds box: framer constrains the dragged panel inside
+           it, which is what stops you flinging the terminal off-screen. */
+        <div
+          ref={boundsRef}
+          className="pointer-events-none fixed inset-0 z-[60] px-0 sm:px-4"
         >
+          <motion.div
+            drag
+            // Entry is opacity/scale rather than a y-slide: drag owns the x/y
+            // transform, and animating y here would fight it.
+            dragListener={false}
+            dragControls={dragControls}
+            dragConstraints={boundsRef}
+            dragMomentum={false}
+            dragElastic={0.04}
+            initial={{ opacity: 0, scale: 0.98 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.98 }}
+            transition={{
+              duration: reduceMotion ? 0 : 0.22,
+              ease: [0.22, 1, 0.36, 1],
+            }}
+            className="pointer-events-auto absolute inset-x-0 bottom-0 px-0 sm:px-4"
+            role="dialog"
+            aria-label="Interactive terminal"
+          >
           <div
             onClick={() => inputRef.current?.focus()}
-            className="mx-auto max-w-3xl overflow-hidden rounded-t-xl border border-neutral-700/80 bg-[#0c0c11] shadow-2xl"
+            className="mx-auto max-w-3xl overflow-hidden rounded-xl border border-neutral-700/80 bg-[#0c0c11] shadow-2xl"
           >
-            {/* Title bar. The red light is a real close button; the other two
-                are decoration, as they are in most terminal emulators. */}
-            <div className="flex items-center gap-2 border-b border-neutral-800 bg-[#15151c] px-4 py-2.5">
+            {/* Title bar doubles as the drag handle. touch-none stops the
+                browser treating a drag here as a page scroll. */}
+            <div
+              onPointerDown={(event) => dragControls.start(event)}
+              className="flex cursor-grab touch-none select-none items-center gap-2 border-b border-neutral-800 bg-[#15151c] px-4 py-2.5 active:cursor-grabbing"
+            >
               <button
                 type="button"
                 onClick={(e) => {
@@ -376,7 +407,8 @@ const Terminal = () => {
               )}
             </div>
           </div>
-        </motion.div>
+          </motion.div>
+        </div>
       )}
     </AnimatePresence>
   );
