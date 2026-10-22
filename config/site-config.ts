@@ -109,6 +109,16 @@ const GridItems: GridItemInterface[] = [
     description: "Ride-hailing app — book a ride, track your driver in real time.",
     previewImage: "muuv",
   },
+  {
+    layout: "2x1",
+    type: "project",
+    title: "ZHS Press",
+    icon: "zhs",
+    color: "#B13F2F",
+    websiteLink: "https://zhspress.org/",
+    description: "Independent press publishing books, a magazine and stationery.",
+    previewImage: "zhspress",
+  },
 ];
 
 /**

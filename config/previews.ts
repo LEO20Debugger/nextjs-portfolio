@@ -2,6 +2,7 @@ import byteMe from "@/public/previews/byte-me.jpg";
 import felmosengineering from "@/public/previews/felmosengineering.jpg";
 import muuv from "@/public/previews/muuv.jpg";
 import pradisedaypass from "@/public/previews/pradisedaypass.jpg";
+import zhspress from "@/public/previews/zhspress.jpg";
 import type { StaticImageData } from "next/image";
 
 /**
@@ -14,4 +15,5 @@ export const projectPreviews: Record<string, StaticImageData> = {
   pradisedaypass,
   felmosengineering,
   muuv,
+  zhspress,
 };

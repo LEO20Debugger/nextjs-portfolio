@@ -153,6 +153,24 @@ const Icons: {
       </defs>
     </svg>
   ),
+  // Open book — a publishing mark of our own, not the ZHS logotype.
+  zhs: (
+    <svg
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M12 6.4C10.3 5 8.2 4.4 5.5 4.4c-.9 0-1.6.1-2.2.2v13.1c.6-.1 1.3-.2 2.2-.2 2.7 0 4.8.6 6.5 2 1.7-1.4 3.8-2 6.5-2 .9 0 1.6.1 2.2.2V4.6c-.6-.1-1.3-.2-2.2-.2-2.7 0-4.8.6-6.5 2Z"
+        stroke="white"
+        strokeWidth="1.7"
+        strokeLinejoin="round"
+      />
+      <path d="M12 6.4v13.2" stroke="white" strokeWidth="1.7" strokeLinecap="round" />
+    </svg>
+  ),
   // Steering wheel — a ride-hailing mark rather than a redrawn brand logo.
   muuv: (
     <svg
