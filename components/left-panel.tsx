@@ -1,5 +1,6 @@
 "use client";
 import BackendEasterEgg from "@/components/backend-easter-egg";
+import PerchBird from "@/components/perch-bird";
 import { siteConfig } from "@/config/site-config";
 import { FileText, Mail, MapPin, MessageCircle } from "lucide-react";
 import Image from "next/image";
@@ -68,7 +69,10 @@ const LeftPanel = () => {
           </p>
         </div>
         {/* Buttons Container */}
-        <div className="mt-6 flex flex-col gap-2.5">
+        <div className="relative mt-6 flex flex-col gap-2.5">
+          {/* They perch along the top of the CV button and bolt if you reach
+              for it. */}
+          <PerchBird count={5} />
           <a
             href={siteConfig.resumeUrl}
             target="_blank"

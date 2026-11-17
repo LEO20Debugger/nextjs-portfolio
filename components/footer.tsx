@@ -1,10 +1,14 @@
 "use client";
+import PerchBird from "@/components/perch-bird";
 import { emitEffect } from "@/utils/effects";
+import { SoundToggle } from "./sound-toggle";
 import { ThemeToggle } from "./theme-toggle";
 
 const Footer = () => {
   return (
-    <div className="flex items-center justify-center w-full pt-6 border-t border-neutral-100 dark:border-neutral-800">
+    <div className="relative flex items-center justify-center w-full pt-6 border-t border-neutral-100 dark:border-neutral-800">
+      {/* Birds on a wire — they perch on the divider above and hop along it. */}
+      <PerchBird count={5} />
       <div className="container flex items-center justify-between">
         <div className="text-xs text-neutral-500">
           Built by Leonard Chibueze Oba | ©{new Date().getFullYear()}
@@ -26,6 +30,7 @@ const Footer = () => {
               `
             </kbd>
           </button>
+          <SoundToggle />
           <ThemeToggle />
         </div>
       </div>

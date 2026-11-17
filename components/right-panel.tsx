@@ -20,6 +20,8 @@ const RightPanel = () => {
               key={item.title + item.type + index}
               size={item.layout}
               index={index}
+              // A flock lives on the roof of the Twitter card.
+              birds={item.title === "Twitter" ? 5 : 0}
             >
               {item.type === "social" ? (
                 <Social item={item} />

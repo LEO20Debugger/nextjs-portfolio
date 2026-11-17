@@ -1,4 +1,5 @@
 "use client";
+import PerchBird from "@/components/perch-bird";
 import { cn } from "@/utils/cn";
 import { cva, type VariantProps } from "class-variance-authority";
 import { motion } from "framer-motion";
@@ -60,9 +61,11 @@ export type GridItemProps = {
   children: React.ReactNode;
   /** Position in the grid, used to stagger cards that enter together. */
   index?: number;
+  /** How many birds perch on this card's top edge. */
+  birds?: number;
 } & VariantProps<typeof variants>;
 
-const GridItem = ({ size, children, index = 0 }: GridItemProps) => {
+const GridItem = ({ size, children, index = 0, birds = 0 }: GridItemProps) => {
   return (
     <motion.div
       variants={gridItemMotion}
@@ -77,10 +80,11 @@ const GridItem = ({ size, children, index = 0 }: GridItemProps) => {
         variants({
           size,
           className:
-            "transition-[background-color,box-shadow,border-color] duration-200 ease-out hover:bg-neutral-50 hover:shadow-grid-hover hover:border-neutral-200 dark:hover:bg-neutral-800 dark:hover:border-neutral-700",
+            "relative transition-[background-color,box-shadow,border-color] duration-200 ease-out hover:bg-neutral-50 hover:shadow-grid-hover hover:border-neutral-200 dark:hover:bg-neutral-800 dark:hover:border-neutral-700",
         })
       )}
     >
+      {birds > 0 && <PerchBird count={birds} />}
       {children}
     </motion.div>
   );
