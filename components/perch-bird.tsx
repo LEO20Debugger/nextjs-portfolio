@@ -31,13 +31,27 @@ const APART = 26; // how much room birds like to keep between each other
 const MAX_BIRDS = 5;
 
 /**
- * Minutes after the clock starts that each bird turns up. A perch begins
+ * Seconds after the clock starts that each bird turns up. A perch begins
  * empty and fills one bird at a time, the wait stretching after each arrival.
  * Past the end of the list the gap keeps growing by `TRAILING_GAP` a bird.
  * Scaring the flock off restarts this schedule from the beginning.
+ *
+ * The scout lands inside the first 40s so an arriving visitor has something to
+ * notice; everything after that is slow enough to stay a thing you catch
+ * rather than a thing that performs at you.
  */
-const ARRIVALS = [1, 4, 8, 13, 19];
-const TRAILING_GAP = 6;
+const ARRIVALS = [40, 120, 480, 780, 1140];
+const TRAILING_GAP = 360;
+
+/**
+ * Perches take turns rather than filling in lockstep. Each one is handed a
+ * slot as it mounts and keeps to its own band of the scout's window, so the
+ * page's first two birds land a good gap apart yet both still inside it.
+ * Later arrivals just get pushed back by `PERCH_STAGGER` a slot.
+ */
+const STAGGER_SLOTS = 2;
+const PERCH_STAGGER = 25; // seconds
+let perchTally = 0;
 
 /* ------------------------------------------------------------------ maths */
 
@@ -47,13 +61,25 @@ const rand = (lo: number, hi: number) => lo + Math.random() * (hi - lo);
 const pick = <T,>(a: T[]) => a[(Math.random() * a.length) | 0];
 const easeOut = (p: number) => 1 - (1 - p) * (1 - p);
 
-/** When bird `i` should drop in, in ms, loosened up a little. */
-const arrivalDelay = (i: number) => {
-  const mins =
+/** When bird `i` of the perch in `slot` should drop in, in ms. */
+const arrivalDelay = (i: number, slot: number) => {
+  const secs =
     i < ARRIVALS.length
       ? ARRIVALS[i]
       : ARRIVALS[ARRIVALS.length - 1] + (i - ARRIVALS.length + 1) * TRAILING_GAP;
-  return mins * 60_000 * rand(0.85, 1.15);
+  const turn = slot % STAGGER_SLOTS;
+
+  if (i === 0) {
+    // The scout's slot is a deadline, not an average, so its window is only
+    // ever carved up backwards from it — every perch's first bird still lands
+    // inside ARRIVALS[0], just in a different part of it from its neighbour.
+    const band = 0.5 / STAGGER_SLOTS;
+    const lo = 0.5 + band * turn;
+    // Leave a gap at the top of each band, so neighbouring perches can't both
+    // land on the boundary between them and arrive together anyway.
+    return secs * 1000 * rand(lo, lo + band - 0.06);
+  }
+  return (secs + turn * PERCH_STAGGER) * 1000 * rand(0.85, 1.15);
 };
 
 /**
@@ -142,12 +168,18 @@ export default function PerchBird({
 
   const layerRef = useRef<HTMLSpanElement>(null);
   const scatter = useRef<() => void>(() => {});
+  // Claimed on the first effect run rather than during render, so a double
+  // invoke in StrictMode doesn't burn two slots on one perch.
+  const slot = useRef(-1);
 
   const foot = (FOOT_VB * size) / VB_W;
   const height = (VB_H * size) / VB_W;
 
   useEffect(() => {
     if (reduceMotion) return;
+
+    if (slot.current < 0) slot.current = perchTally++;
+    const turn = slot.current;
 
     const layer = layerRef.current;
     if (!layer) return;
@@ -215,7 +247,7 @@ export default function PerchBird({
         const now = performance.now();
         flock.forEach((b, i) => {
           b.x = clamp(lo + step * (i + 1) + rand(-step / 3, step / 3), lo, hi);
-          b.returnAt = now + arrivalDelay(i);
+          b.returnAt = now + arrivalDelay(i, turn);
         });
         placed = true;
       } else if (prev > 0) {
@@ -312,7 +344,7 @@ export default function PerchBird({
       b.dur = rand(900, 1300);
       // Being startled resets the whole schedule: the flock gathers again
       // from scratch rather than drifting back a moment later.
-      b.returnAt = t + arrivalDelay(b.index);
+      b.returnAt = t + arrivalDelay(b.index, turn);
     };
 
     const startArrive = (b: Bird, t: number) => {
