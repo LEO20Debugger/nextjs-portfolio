@@ -173,7 +173,7 @@ export default function PerchBird({
   const flockSize = clamp(Math.round(count), 0, MAX_BIRDS);
 
   const layerRef = useRef<HTMLSpanElement>(null);
-  const scatter = useRef<() => void>(() => {});
+  const scatter = useRef<(alarm?: boolean) => void>(() => {});
   // Claimed on the first effect run rather than during render, so a double
   // invoke in StrictMode doesn't burn two slots on one perch.
   const slot = useRef(-1);
@@ -393,7 +393,7 @@ export default function PerchBird({
     /* -------------------------------------------------------------- scatter */
 
     let cooldown = 0;
-    scatter.current = () => {
+    scatter.current = (alarm = false) => {
       const t = performance.now();
       if (W <= 0 || t < cooldown) return;
       cooldown = t + 1200;
@@ -403,6 +403,14 @@ export default function PerchBird({
         if (!here(b) || b.mode === "flee" || b.mode === "arrive") return;
         // Staggered, so they peel off one after another rather than as a block.
         b.fleeAt = t + rand(0, 220);
+        // The first one cries out straight away, inside the gesture that
+        // caused it — browsers only let audio start from there. Once the
+        // context is awake the rest can follow on their own stagger.
+        if (alarm) {
+          const seed = ((b.index + 1) * 0.37) % 1;
+          if (!any) chirp(seed);
+          else window.setTimeout(() => chirp(seed), Math.max(0, b.fleeAt - t));
+        }
         any = true;
       });
       if (!any) cooldown = 0;
@@ -714,7 +722,9 @@ export default function PerchBird({
     raf = requestAnimationFrame(frame);
 
     const parent = layer.parentElement;
-    const spook = () => scatter.current();
+    // A press is a gesture, so it can carry sound; drifting the mouse over
+    // the perch is not, and a silent fright is better than a dead call.
+    const spook = (e: Event) => scatter.current(e.type === "pointerdown");
     if (skittish && parent) {
       // pointerenter covers the mouse; pointerdown covers a tap, where there
       // is no hover to notice in the first place.
@@ -743,10 +753,9 @@ export default function PerchBird({
           key={i}
           data-bird=""
           onClick={() => {
-            // The click is both the alarm and the gesture that lets the
-            // browser start audio at all.
-            chirp(((i + 1) * 0.37) % 1);
-            scatter.current();
+            // Clicking the bird itself. The press has usually already set
+            // this off via the perch below; the cooldown keeps it to one.
+            scatter.current(true);
           }}
           className="pointer-events-auto absolute left-0 top-0 block cursor-pointer"
           style={{
