@@ -40,17 +40,22 @@ const MAX_BIRDS = 5;
  * notice; everything after that is slow enough to stay a thing you catch
  * rather than a thing that performs at you.
  */
-const ARRIVALS = [40, 120, 480, 780, 1140];
+const ARRIVALS = [10, 120, 480, 780, 1140];
 const TRAILING_GAP = 360;
 
 /**
- * Perches take turns rather than filling in lockstep. Each one is handed a
- * slot as it mounts and keeps to its own band of the scout's window, so the
- * page's first two birds land a good gap apart yet both still inside it.
- * Later arrivals just get pushed back by `PERCH_STAGGER` a slot.
+ * Perches take turns rather than filling in lockstep. Each is handed a slot as
+ * it mounts and keeps to its own slice of the run-up to `ARRIVALS[0]`, so the
+ * page's first birds land a clear gap apart yet all still inside it. Held in
+ * seconds rather than as a fraction of the window, so shortening the opening
+ * wait doesn't quietly shrink the gap along with it.
+ *
+ * Arrivals after the scout just get pushed back by `PERCH_STAGGER` a slot.
  */
 const STAGGER_SLOTS = 2;
-const PERCH_STAGGER = 25; // seconds
+const SCOUT_SPREAD = 2.5; // seconds of drift within one perch's own slice
+const SCOUT_STAGGER = 4; // seconds between neighbouring perches' slices
+const PERCH_STAGGER = 25; // seconds, for every bird after the scout
 let perchTally = 0;
 
 /* ------------------------------------------------------------------ maths */
@@ -70,14 +75,15 @@ const arrivalDelay = (i: number, slot: number) => {
   const turn = slot % STAGGER_SLOTS;
 
   if (i === 0) {
-    // The scout's slot is a deadline, not an average, so its window is only
-    // ever carved up backwards from it — every perch's first bird still lands
-    // inside ARRIVALS[0], just in a different part of it from its neighbour.
-    const band = 0.5 / STAGGER_SLOTS;
-    const lo = 0.5 + band * turn;
-    // Leave a gap at the top of each band, so neighbouring perches can't both
-    // land on the boundary between them and arrive together anyway.
-    return secs * 1000 * rand(lo, lo + band - 0.06);
+    // The scout's time is a deadline, not an average, so the slices are
+    // measured backwards from it: the last slot lands right on it and each
+    // earlier perch sits a further SCOUT_STAGGER ahead. Every first bird is
+    // still inside ARRIVALS[0], just never alongside its neighbour.
+    const lo = Math.max(
+      0.5,
+      secs - SCOUT_SPREAD - (STAGGER_SLOTS - 1 - turn) * SCOUT_STAGGER
+    );
+    return rand(lo, Math.min(secs, lo + SCOUT_SPREAD)) * 1000;
   }
   return (secs + turn * PERCH_STAGGER) * 1000 * rand(0.85, 1.15);
 };
