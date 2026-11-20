@@ -46,3 +46,26 @@
     scrollbar-color: rgba(163, 163, 163, 0.3) transparent;
   }
 }
+
+/* Theme switch — the circular wipe out of the toggle button.
+   The browser's own cross-fade between the two snapshots is switched off so
+   the clip-path animation in `theme-toggle.tsx` is the only thing running,
+   and the new theme is stacked over the old one for the circle to open into. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+::view-transition-old(root) {
+  z-index: 1;
+}
+
+::view-transition-new(root) {
+  z-index: 2;
+}
+
+/* The pair isolates by default, which clips the stacking above. */
+::view-transition-image-pair(root) {
+  isolation: auto;
+}

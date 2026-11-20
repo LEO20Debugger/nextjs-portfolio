@@ -2,15 +2,61 @@
 import BackendEasterEgg from "@/components/backend-easter-egg";
 import PerchBird from "@/components/perch-bird";
 import { siteConfig } from "@/config/site-config";
+import { usePrefersReducedMotion } from "@/hooks/use-media-query";
+import { motion, useMotionValue, useSpring } from "framer-motion";
 import { FileText, Mail, MapPin, MessageCircle } from "lucide-react";
 import Image from "next/image";
-import { useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import Footer from "./footer";
+
+/**
+ * The rail used to appear fully formed while the grid beside it sprang in,
+ * which on desktop — where both are above the fold — read as the left half
+ * having failed to load. It now introduces itself top to bottom.
+ */
+const heroStagger = {
+  hidden: {},
+  show: { transition: { delayChildren: 0.05, staggerChildren: 0.07 } },
+};
+
+const heroItem = {
+  hidden: { opacity: 0, y: 14 },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: { type: "spring", stiffness: 280, damping: 30 },
+  },
+};
+
+/** How far the portrait leans towards the cursor, in degrees. */
+const TILT = 12;
 
 const LeftPanel = () => {
   const [clickCount, setClickCount] = useState(0);
   const [trigger, setTrigger] = useState(0);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const reduceMotion = usePrefersReducedMotion();
+
+  const tiltX = useSpring(useMotionValue(0), { stiffness: 220, damping: 20 });
+  const tiltY = useSpring(useMotionValue(0), { stiffness: 220, damping: 20 });
+
+  const handleAvatarMove = useCallback(
+    (e: React.PointerEvent<HTMLButtonElement>) => {
+      if (reduceMotion) return;
+      const r = e.currentTarget.getBoundingClientRect();
+      // -0.5 … 0.5 from the centre of the portrait.
+      const nx = (e.clientX - r.left) / r.width - 0.5;
+      const ny = (e.clientY - r.top) / r.height - 0.5;
+      tiltY.set(nx * TILT * 2);
+      tiltX.set(-ny * TILT * 2);
+    },
+    [reduceMotion, tiltX, tiltY]
+  );
+
+  const handleAvatarLeave = useCallback(() => {
+    tiltX.set(0);
+    tiltY.set(0);
+  }, [tiltX, tiltY]);
 
   const handleAvatarClick = () => {
     const next = clickCount + 1;
@@ -28,48 +74,86 @@ const LeftPanel = () => {
   return (
     <div
       key="left-panel"
-      className="flex flex-col justify-between py-6 xl:max-w-sm xl:py-10 xl:h-screen xl:sticky xl:top-0 shrink-0"
+      className="flex flex-col py-6 xl:max-w-sm xl:py-10 xl:h-screen xl:sticky xl:top-0 shrink-0"
     >
       <BackendEasterEgg trigger={trigger} />
-      {/* Top Container */}
-      <div>
-        <button
+      {/* Top Container. On desktop the panel is a full-height sticky rail, so
+          this takes the slack and centres itself in it — left at its natural
+          height the hero sat in the top half with ~400px of dead column under
+          it. `min-h-0` keeps it shrinking rather than overflowing the rail on
+          short laptop screens. */}
+      <motion.div
+        variants={heroStagger}
+        initial={reduceMotion ? "show" : "hidden"}
+        animate="show"
+        className="xl:flex xl:min-h-0 xl:flex-1 xl:flex-col xl:justify-center"
+      >
+        <motion.button
+          variants={heroItem}
           type="button"
           onClick={handleAvatarClick}
+          onPointerMove={handleAvatarMove}
+          onPointerLeave={handleAvatarLeave}
           aria-label={`Portrait of ${siteConfig.creator}.`}
-          className="relative cursor-pointer select-none w-fit rounded-full block ring-offset-4 ring-offset-white dark:ring-offset-neutral-950 transition-shadow hover:shadow-grid-hover"
+          className="group relative cursor-pointer select-none w-fit rounded-full block ring-offset-4 ring-offset-white dark:ring-offset-neutral-950 transition-shadow hover:shadow-grid-hover"
+          style={{ perspective: 600 }}
           title={clickCount >= 2 ? `${5 - clickCount} more...` : undefined}
         >
-          <Image
-            priority
-            loading="eager"
-            alt={siteConfig.creator}
-            placeholder="blur"
-            src="/Leonard.jpeg"
-            width={120}
-            height={120}
-            blurDataURL="/Leonard.jpeg"
-            draggable={false}
-            className={`h-[120px] w-[120px] rounded-full pointer-events-none select-none transition-transform duration-150 ease-out ${
-              clickCount > 0 ? "scale-95" : "scale-100 hover:scale-[1.03]"
-            }`}
-          />
-        </button>
+          {/* The lean lives on a wrapper rather than on the portrait itself:
+              the image already owns a CSS `transform` for the press and hover
+              scale, and two transforms on one element overwrite each other. */}
+          <motion.div
+            style={{ rotateX: tiltX, rotateY: tiltY }}
+            className="rounded-full"
+          >
+            <Image
+              priority
+              loading="eager"
+              alt={siteConfig.creator}
+              placeholder="blur"
+              src="/Leonard.jpeg"
+              width={120}
+              height={120}
+              blurDataURL="/Leonard.jpeg"
+              draggable={false}
+              className={`h-[120px] w-[120px] rounded-full pointer-events-none select-none transition-transform duration-150 ease-out ${
+                clickCount > 0
+                  ? "scale-95"
+                  : "scale-100 group-hover:scale-[1.03]"
+              }`}
+            />
+          </motion.div>
+        </motion.button>
 
         {/* Text Container */}
         <div className="mt-6">
-          <div className="text-xl font-medium text-primary">
+          <motion.div
+            variants={heroItem}
+            className="text-xl font-medium text-primary"
+          >
             {siteConfig.title}
-          </div>
-          <h1 className="mt-2 text-[clamp(1.15rem,5.5vw,2.25rem)] font-bold whitespace-nowrap tracking-tight">
+          </motion.div>
+          {/* `nowrap` sizes the name to the column on narrow screens. The
+              desktop rail is a fixed 384px, so there it can wrap instead and
+              take the larger size the extra vertical room now allows. */}
+          <motion.h1
+            variants={heroItem}
+            className="mt-2 text-[clamp(1.15rem,5.5vw,2.25rem)] font-bold whitespace-nowrap tracking-tight xl:whitespace-normal xl:text-[2.75rem] xl:leading-[1.05]"
+          >
             {siteConfig.creator}
-          </h1>
-          <p className="text-2xl font-light text-neutral-500">
+          </motion.h1>
+          <motion.p
+            variants={heroItem}
+            className="text-2xl font-light text-neutral-500"
+          >
             {siteConfig.bio}
-          </p>
+          </motion.p>
         </div>
         {/* Buttons Container */}
-        <div className="relative mt-6 flex flex-col gap-2.5">
+        <motion.div
+          variants={heroItem}
+          className="relative mt-6 flex flex-col gap-2.5"
+        >
           {/* They perch along the top of the CV button and bolt if you reach
               for it. */}
           <PerchBird count={5} />
@@ -113,11 +197,11 @@ const LeftPanel = () => {
               WhatsApp
             </a>
           </div>
-        </div>
-        {/* Footer */}
-        <div className="hidden mt-6 xl:flex">
-          <Footer />
-        </div>
+        </motion.div>
+      </motion.div>
+      {/* Footer — anchored to the foot of the rail on desktop. */}
+      <div className="hidden mt-6 shrink-0 xl:flex">
+        <Footer />
       </div>
     </div>
   );

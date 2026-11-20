@@ -40,6 +40,11 @@ const ALL_TECH: { name: string; color: string; slug?: string; svg?: React.ReactN
 
 const SIZE_WIDE = 56;
 const SIZE_NARROW = 42;
+/** Height of the name label hanging below each chip's icon box. A ball's `y`
+ *  is the centre of the ICON, so the label has to be counted into the bottom
+ *  bound — otherwise every chip that drifts low has its name clipped off by
+ *  the card's overflow. */
+const LABEL_H = 18;
 /** Above this share of the card's area, chips can't be separated without
  *  jitter — there simply isn't room — so collision is switched off and they
  *  drift through each other instead. */
@@ -93,7 +98,7 @@ export default function TechStack() {
         const gapX = width / cols;
         return {
           x: gapX * col + gapX / 2,
-          y: Math.min(height - S / 2, S / 2 + row * (S + 28)),
+          y: Math.min(height - S / 2 - LABEL_H, S / 2 + row * (S + 28)),
           vx: 0,
           vy: 0,
         };
@@ -104,7 +109,7 @@ export default function TechStack() {
       const lane = width / ALL_TECH.length;
       return {
         x: lane * (i + 0.5),
-        y: S / 2 + Math.random() * Math.max(1, height - S),
+        y: S / 2 + Math.random() * Math.max(1, height - S - LABEL_H),
         vx: (Math.random() > 0.5 ? 1 : -1) * (0.3 + Math.random() * 0.4),
         vy: (Math.random() > 0.5 ? 1 : -1) * (0.3 + Math.random() * 0.4),
       };
@@ -130,13 +135,23 @@ export default function TechStack() {
       const w = el.offsetWidth;
       const h = el.offsetHeight;
 
+      // Walls. Vertically the chip occupies S + LABEL_H, with `y` at the
+      // centre of the icon, so the floor sits LABEL_H higher than the ceiling
+      // is low.
+      const clamp = (b: Ball, bounce: boolean) => {
+        if (b.x - S / 2 <= 0) { b.x = S / 2; if (bounce) b.vx = Math.abs(b.vx); }
+        if (b.x + S / 2 >= w) { b.x = w - S / 2; if (bounce) b.vx = -Math.abs(b.vx); }
+        if (b.y - S / 2 <= 0) { b.y = S / 2; if (bounce) b.vy = Math.abs(b.vy); }
+        if (b.y + S / 2 + LABEL_H >= h) {
+          b.y = h - S / 2 - LABEL_H;
+          if (bounce) b.vy = -Math.abs(b.vy);
+        }
+      };
+
       for (const b of ballsRef.current) {
         b.x += b.vx;
         b.y += b.vy;
-        if (b.x - S / 2 <= 0) { b.x = S / 2; b.vx = Math.abs(b.vx); }
-        if (b.x + S / 2 >= w) { b.x = w - S / 2; b.vx = -Math.abs(b.vx); }
-        if (b.y - S / 2 <= 0) { b.y = S / 2; b.vy = Math.abs(b.vy); }
-        if (b.y + S / 2 >= h) { b.y = h - S / 2; b.vy = -Math.abs(b.vy); }
+        clamp(b, true);
       }
 
       // Keep chips from stacking on top of each other: push any overlapping
@@ -170,6 +185,11 @@ export default function TechStack() {
           }
         }
       }
+
+      // Separation runs after the walls and can push a chip straight back
+      // through one, so re-clamp before painting — position only, or a chip
+      // wedged into a corner flips its velocity every frame and buzzes.
+      for (const b of ballsRef.current) clamp(b, false);
 
       paint();
       animRef.current = requestAnimationFrame(tick);

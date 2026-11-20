@@ -13,7 +13,9 @@ const RightPanel = () => {
     <div className="flex-1 w-full xl:py-10 py-6">
       {/* Plain container: each card owns its own viewport trigger, so the
           grid must not propagate variants and override them. */}
-      <div className="grid w-full grid-cols-4 xl:gap-10 gap-6 auto-rows-[76px]">
+      {/* Twelve columns rather than four: the same cards still land on the
+          same halves and quarters, but projects can take a third at 2xl. */}
+      <div className="grid w-full grid-cols-12 xl:gap-10 gap-6 auto-rows-[76px]">
         {siteConfig.items.map((item, index) => {
           return (
             <GridItem
@@ -35,18 +37,21 @@ const RightPanel = () => {
             </GridItem>
           );
         })}
-        {/* View more projects button — spans full width, sits below project cards */}
+        {/* View more projects — takes a project-sized slot rather than a full
+            row of its own, so it flows into the gap an odd project count
+            leaves behind instead of sitting on a row below the fold. */}
         <motion.div
           variants={gridItemMotion}
+          custom={siteConfig.items.length}
           initial="hidden"
           whileInView="show"
           viewport={gridItemViewport}
-          className="col-span-full flex justify-center"
+          className="md:col-span-6 col-span-full 2xl:col-span-4 row-span-1"
         >
           <Link
             href="https://github.com/LEO20Debugger"
             target="_blank"
-            className="group flex items-center gap-2 px-5 py-2.5 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-sm font-medium text-neutral-600 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800 hover:text-neutral-900 dark:hover:text-white hover:-translate-y-0.5 hover:shadow-grid-hover active:translate-y-0 transition-all duration-200 shadow-grid"
+            className="group flex h-full w-full items-center justify-center gap-2 px-5 py-2.5 rounded-3xl border border-dashed border-neutral-300 dark:border-neutral-700 text-sm font-medium text-neutral-500 dark:text-neutral-400 hover:border-solid hover:border-neutral-200 dark:hover:border-neutral-700 hover:bg-white dark:hover:bg-neutral-900 hover:text-neutral-900 dark:hover:text-white hover:-translate-y-0.5 hover:shadow-grid-hover active:translate-y-0 transition-all duration-200"
           >
             <Github
               size={15}

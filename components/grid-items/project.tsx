@@ -58,7 +58,7 @@ const Project = ({ item }: { item: GridItemInterface }) => {
               <Link
                 href={item.buttonLink}
                 target="_blank"
-                className="text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:text-black dark:hover:text-white flex items-center gap-1 transition-colors"
+                className="relative text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:text-black dark:hover:text-white flex items-center gap-1 transition-colors after:absolute after:inset-x-0 after:-bottom-0.5 after:h-px after:origin-left after:scale-x-0 after:bg-current after:transition-transform after:duration-300 after:ease-out after:content-[''] hover:after:scale-x-100"
                 onClick={(e) => e.stopPropagation()}
               >
                 <ExternalLink size={12} />
@@ -69,7 +69,7 @@ const Project = ({ item }: { item: GridItemInterface }) => {
               <Link
                 href={item.websiteLink}
                 target="_blank"
-                className="text-xs font-semibold text-primary hover:underline flex items-center gap-1 transition-all"
+                className="relative text-xs font-semibold text-primary flex items-center gap-1 transition-all after:absolute after:inset-x-0 after:-bottom-0.5 after:h-px after:origin-left after:scale-x-0 after:bg-current after:transition-transform after:duration-300 after:ease-out after:content-[''] hover:after:scale-x-100"
                 onClick={(e) => e.stopPropagation()}
               >
                 <ExternalLink size={12} />

@@ -197,7 +197,10 @@ export default function ShootingStars() {
   return (
     <canvas
       ref={canvasRef}
-      className="absolute inset-0 z-0 pointer-events-none"
+      // Fixed, not absolute: the bitmap is sized to the viewport, so pinned
+      // to a `main` that is taller than one screen the sky came out
+      // vertically stretched and ran out before the foot of the page.
+      className="fixed inset-0 z-0 pointer-events-none"
     />
   );
 }

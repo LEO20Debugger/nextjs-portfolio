@@ -1,23 +1,33 @@
 "use client";
 import PerchBird from "@/components/perch-bird";
+import { usePrefersReducedMotion } from "@/hooks/use-media-query";
 import { cn } from "@/utils/cn";
 import { cva, type VariantProps } from "class-variance-authority";
 import { motion } from "framer-motion";
+import { useCallback, useRef } from "react";
 
 const variants = cva(
-  "shadow-grid rounded-3xl bg-white dark:bg-neutral-900 flex flex-col justify-center @container border border-neutral-100 dark:border-neutral-800",
+  // `group` drives the spotlight, `isolate` contains it: the highlight sits on
+  // a negative z-index so it paints over the card's background but under its
+  // text, and without a stacking context of its own it would fall through to
+  // the page behind the card instead.
+  "group isolate shadow-grid rounded-3xl bg-white dark:bg-neutral-900 flex flex-col justify-center @container border border-neutral-100 dark:border-neutral-800",
   {
     variants: {
       size: {
-        "1x2": "md:col-span-1 col-span-2 row-span-2 md:p-8 p-4",
+        "1x2": "md:col-span-3 col-span-6 row-span-2 md:p-8 p-4",
         // Project cards. Taller on touch devices, where the card carries a
         // visible preview thumbnail — gated on the same hover query as the
         // thumbnail itself so the two can never disagree about the layout.
+        //
+        // At 2xl they drop to a third of the grid so three sit per row: at a
+        // half each they were ~510px wide holding an icon, a title and one
+        // clamped line, which is mostly empty card.
         "2x1":
-          "md:col-span-2 col-span-full row-span-3 [@media(hover:hover)_and_(pointer:fine)]:row-span-1 py-4 md:px-8 px-4",
-        "2x2": "md:col-span-2 col-span-full row-span-2 md:p-8 p-4",
+          "md:col-span-6 col-span-full 2xl:col-span-4 row-span-3 [@media(hover:hover)_and_(pointer:fine)]:row-span-1 py-4 md:px-8 px-4",
+        "2x2": "md:col-span-6 col-span-full row-span-2 md:p-8 p-4",
         "2x4":
-          "md:col-span-2 col-span-full row-span-4 relative overflow-hidden",
+          "md:col-span-6 col-span-full row-span-4 relative overflow-hidden",
         // Taller on phones: nine tech chips in a two-row-high card is far too
         // dense, so they spend the whole time shoving each other around.
         "4x2":
@@ -66,6 +76,22 @@ export type GridItemProps = {
 } & VariantProps<typeof variants>;
 
 const GridItem = ({ size, children, index = 0, birds = 0 }: GridItemProps) => {
+  const reduceMotion = usePrefersReducedMotion();
+  const spotlightRef = useRef<HTMLDivElement>(null);
+
+  // The highlight's centre is written straight to the node's style. Putting
+  // pointer coordinates through React state would re-render the card — and
+  // its bird layer — on every mouse move.
+  const handleMove = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
+    const node = spotlightRef.current;
+    if (!node) return;
+    const r = e.currentTarget.getBoundingClientRect();
+    // Percentages, not pixels: the card is scaled while hovered, and a ratio
+    // of the (scaled) box still lands on the right spot inside it.
+    node.style.setProperty("--mx", `${((e.clientX - r.left) / r.width) * 100}%`);
+    node.style.setProperty("--my", `${((e.clientY - r.top) / r.height) * 100}%`);
+  }, []);
+
   return (
     <motion.div
       variants={gridItemMotion}
@@ -76,6 +102,7 @@ const GridItem = ({ size, children, index = 0, birds = 0 }: GridItemProps) => {
       whileHover={{ y: -4, scale: 1.012 }}
       whileTap={{ scale: 0.995 }}
       transition={{ type: "spring", stiffness: 400, damping: 26 }}
+      onPointerMove={reduceMotion ? undefined : handleMove}
       className={cn(
         variants({
           size,
@@ -84,6 +111,17 @@ const GridItem = ({ size, children, index = 0, birds = 0 }: GridItemProps) => {
         })
       )}
     >
+      {!reduceMotion && (
+        <div
+          ref={spotlightRef}
+          aria-hidden
+          className="pointer-events-none absolute inset-0 -z-10 rounded-[inherit] opacity-0 transition-opacity duration-300 ease-out group-hover:opacity-100"
+          style={{
+            background:
+              "radial-gradient(240px circle at var(--mx, 50%) var(--my, 50%), rgba(97, 120, 241, 0.16), transparent 72%)",
+          }}
+        />
+      )}
       {birds > 0 && <PerchBird count={birds} />}
       {children}
     </motion.div>
