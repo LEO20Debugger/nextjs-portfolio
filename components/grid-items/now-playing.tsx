@@ -104,7 +104,7 @@ const NowPlaying = () => {
     /* The pill sits across the card's top edge. `GridItem` is `relative`, so
        this positions against the card itself rather than its padding box, and
        its background matches the card's so it cuts the border cleanly. */
-    <span className="absolute -top-5 left-6 z-10 rounded-full border border-neutral-200 bg-white px-3 py-0.5 text-xs font-semibold text-neutral-700 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200">
+    <span className="absolute -top-3 left-6 z-10 rounded-full border border-neutral-200 bg-white px-3 py-0.5 text-xs font-semibold text-neutral-700 xl:-top-5 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200">
       Music
     </span>
   );

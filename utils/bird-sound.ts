@@ -103,6 +103,31 @@ function voice(
   osc.stop(at + dur + 0.02);
 }
 
+let primed = false;
+
+/**
+ * Opens the audio context on the first user gesture anywhere on the page.
+ *
+ * Browsers refuse to start audio outside a gesture, and moving a mouse onto
+ * something is not one. Without this the birds could only ever be heard from
+ * a tap: on a mouse the hover that scatters them always lands before the
+ * click, so the flock was gone, silently, before any gesture arrived.
+ *
+ * Once the context is open it stays open, and later chirps can come from
+ * anything — including a hover.
+ */
+export function primeAudio() {
+  if (typeof window === "undefined" || primed) return;
+  primed = true;
+  const open = () => {
+    audio();
+    window.removeEventListener("pointerdown", open);
+    window.removeEventListener("keydown", open);
+  };
+  window.addEventListener("pointerdown", open);
+  window.addEventListener("keydown", open);
+}
+
 /**
  * An alarm call: two or three quick chirps, the way a small bird sounds when
  * something has just startled it off a perch.

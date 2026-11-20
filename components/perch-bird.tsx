@@ -1,7 +1,7 @@
 "use client";
 
 import { usePrefersReducedMotion } from "@/hooks/use-media-query";
-import { chirp } from "@/utils/bird-sound";
+import { chirp, primeAudio } from "@/utils/bird-sound";
 import { useEffect, useRef } from "react";
 
 /**
@@ -722,9 +722,15 @@ export default function PerchBird({
     raf = requestAnimationFrame(frame);
 
     const parent = layer.parentElement;
-    // A press is a gesture, so it can carry sound; drifting the mouse over
-    // the perch is not, and a silent fright is better than a dead call.
-    const spook = (e: Event) => scatter.current(e.type === "pointerdown");
+    // The context is opened by the first click anywhere on the page, so by
+    // the time anyone reaches for this button a hover can carry sound too.
+    //
+    // It used to alarm only on pointerdown, on the grounds that a press is a
+    // gesture and a hover is not. The effect was that nobody on a mouse ever
+    // heard them: the hover fired first, scattered the flock in silence, and
+    // started a cooldown that swallowed the click behind it.
+    primeAudio();
+    const spook = () => scatter.current(true);
     if (skittish && parent) {
       // pointerenter covers the mouse; pointerdown covers a tap, where there
       // is no hover to notice in the first place.
