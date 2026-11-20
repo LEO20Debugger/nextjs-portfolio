@@ -80,10 +80,11 @@ export const metadata: Metadata = {
   },
   // Next 13.4 carries themeColor on `metadata`; the standalone `viewport`
   // export is a 14.x convention and is ignored here.
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
-    { media: "(prefers-color-scheme: dark)", color: "#0a0a0a" },
-  ],
+  //
+  // One value, not a pair keyed on the OS setting: the site opens dark for
+  // everyone, so keying this on `prefers-color-scheme` would hand a
+  // light-mode visitor a white browser chrome above a dark page.
+  themeColor: "#0a0a0a",
 };
 
 /** Structured data — what makes a name query resolve to this page. */
@@ -113,10 +114,14 @@ export default function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(personJsonLd) }}
         />
+        {/* Dark is the design, not a preference: the site opens dark however
+            the OS is set, and the footer toggle switches to light for anyone
+            who wants it. next-themes remembers that choice, and `enableSystem`
+            stays off so the OS setting can't override it on the next visit. */}
         <ThemeProvider
           attribute="class"
-          defaultTheme="system"
-          enableSystem
+          defaultTheme="dark"
+          enableSystem={false}
           disableTransitionOnChange
         >
           <div className="flex flex-col min-h-full">{children}</div>

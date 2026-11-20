@@ -46,7 +46,7 @@ const RightPanel = () => {
           initial="hidden"
           whileInView="show"
           viewport={gridItemViewport}
-          className="md:col-span-6 col-span-full 2xl:col-span-4 row-span-1"
+          className="md:col-span-6 col-span-full 2xl:col-span-4 row-span-1 md:row-span-3"
         >
           <Link
             href="https://github.com/LEO20Debugger"

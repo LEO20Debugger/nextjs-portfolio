@@ -16,15 +16,13 @@ const variants = cva(
     variants: {
       size: {
         "1x2": "md:col-span-3 col-span-6 row-span-2 md:p-8 p-4",
-        // Project cards. Taller on touch devices, where the card carries a
-        // visible preview thumbnail — gated on the same hover query as the
-        // thumbnail itself so the two can never disagree about the layout.
+        // Project cards — one media layout on every device now, so the row
+        // span no longer forks on whether the pointer can hover.
         //
-        // At 2xl they drop to a third of the grid so three sit per row: at a
-        // half each they were ~510px wide holding an icon, a title and one
-        // clamped line, which is mostly empty card.
-        "2x1":
-          "md:col-span-6 col-span-full 2xl:col-span-4 row-span-3 [@media(hover:hover)_and_(pointer:fine)]:row-span-1 py-4 md:px-8 px-4",
+        // At 2xl they drop to a third of the grid so three sit per row, and
+        // the padding stays tight: on a 328px card every extra pixel of it
+        // comes straight out of the screenshot.
+        "2x1": "md:col-span-6 col-span-full 2xl:col-span-4 row-span-3 p-4",
         "2x2": "md:col-span-6 col-span-full row-span-2 md:p-8 p-4",
         "2x4":
           "md:col-span-6 col-span-full row-span-4 relative overflow-hidden",

@@ -74,7 +74,7 @@ const LeftPanel = () => {
   return (
     <div
       key="left-panel"
-      className="flex flex-col py-6 xl:max-w-sm xl:py-10 xl:h-screen xl:sticky xl:top-0 shrink-0"
+      className="flex flex-col py-6 xl:max-w-md xl:py-10 xl:h-screen xl:sticky xl:top-0 shrink-0"
     >
       <BackendEasterEgg trigger={trigger} />
       {/* Top Container. On desktop the panel is a full-height sticky rail, so
@@ -133,12 +133,13 @@ const LeftPanel = () => {
           >
             {siteConfig.title}
           </motion.div>
-          {/* `nowrap` sizes the name to the column on narrow screens. The
-              desktop rail is a fixed 384px, so there it can wrap instead and
-              take the larger size the extra vertical room now allows. */}
+          {/* One line at every width. On phones `clamp` sizes the name to
+              the viewport; the desktop rail is a fixed 448px, which is what
+              sets the 2.375rem. 2.5rem fits the 20 characters to the pixel,
+              with nothing left over if a fallback font ever stands in. */}
           <motion.h1
             variants={heroItem}
-            className="mt-2 text-[clamp(1.15rem,5.5vw,2.25rem)] font-bold whitespace-nowrap tracking-tight xl:whitespace-normal xl:text-[2.75rem] xl:leading-[1.05]"
+            className="mt-2 text-[clamp(1.15rem,5.5vw,2.25rem)] font-bold whitespace-nowrap tracking-tight xl:text-[2.375rem] xl:leading-[1.1]"
           >
             {siteConfig.creator}
           </motion.h1>

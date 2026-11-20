@@ -11,6 +11,9 @@ type ViewTransitionDocument = Document & {
   startViewTransition?: (callback: () => void) => { ready: Promise<void> };
 };
 
+/** The page's two ground colours, matching `globals.css`. */
+const PAGE_BG = { dark: "#0a0a0a", light: "#ffffff" };
+
 export function ThemeToggle() {
   const { setTheme, resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
@@ -23,19 +26,45 @@ export function ThemeToggle() {
   const isDark = resolvedTheme === "dark";
 
   /**
-   * The new theme is revealed by a circle growing out of the button rather
-   * than appearing all at once, which is the one place on the page where a
-   * showy transition earns itself: it shows where the change came from.
+   * Applies the theme. next-themes sets the class from an effect, which
+   * `flushSync` does not reach, so it is set here too — the provider lands on
+   * the same value a moment later, making that a no-op rather than a fight.
+   */
+  const apply = (next: "dark" | "light") => {
+    document.documentElement.classList.toggle("dark", next === "dark");
+    setTheme(next);
+  };
+
+  /**
+   * Three ways in, softest first:
    *
-   * Falls back to a plain switch without View Transitions (Firefox, older
-   * Safari) and whenever reduced motion is asked for.
+   *  - View Transitions: the new theme opens as a circle out of the button,
+   *    so the change has a visible origin.
+   *  - Anywhere else (Firefox, older Safari): a veil of the outgoing page
+   *    colour fades off the top. Done by hand rather than with a CSS
+   *    transition, because the provider's `disableTransitionOnChange` would
+   *    switch a transition off at exactly the wrong moment.
+   *  - Reduced motion: straight swap.
    */
   const toggle = (event: React.MouseEvent<HTMLButtonElement>) => {
     const next = isDark ? "light" : "dark";
     const doc = document as ViewTransitionDocument;
 
-    if (reduceMotion || typeof doc.startViewTransition !== "function") {
-      setTheme(next);
+    if (reduceMotion) {
+      apply(next);
+      return;
+    }
+
+    if (typeof doc.startViewTransition !== "function") {
+      const veil = document.createElement("div");
+      veil.style.cssText = `position:fixed;inset:0;z-index:9999;pointer-events:none;background:${
+        isDark ? PAGE_BG.dark : PAGE_BG.light
+      }`;
+      document.body.appendChild(veil);
+      apply(next);
+      veil
+        .animate({ opacity: [1, 0] }, { duration: 380, easing: "ease-out" })
+        .addEventListener("finish", () => veil.remove());
       return;
     }
 
@@ -48,29 +77,30 @@ export function ThemeToggle() {
     );
 
     const transition = doc.startViewTransition(() => {
-      flushSync(() => {
-        // next-themes applies the class from an effect, which `flushSync`
-        // does not reach — so set it here as well. The provider lands on the
-        // same value a moment later, making this a no-op rather than a fight.
-        document.documentElement.classList.toggle("dark", next === "dark");
-        setTheme(next);
-      });
+      flushSync(() => apply(next));
     });
 
     transition.ready.then(() => {
-      document.documentElement.animate(
+      const root = document.documentElement;
+      const options = {
+        duration: 620,
+        // Quint ease-out: quick to commit, long and soft to settle.
+        easing: "cubic-bezier(0.22, 1, 0.36, 1)",
+        pseudoElement: "::view-transition-new(root)",
+      } as const;
+
+      root.animate(
         {
           clipPath: [
             `circle(0px at ${x}px ${y}px)`,
             `circle(${radius}px at ${x}px ${y}px)`,
           ],
         },
-        {
-          duration: 450,
-          easing: "cubic-bezier(0.4, 0, 0.2, 1)",
-          pseudoElement: "::view-transition-new(root)",
-        }
+        options
       );
+      // Takes the hard edge off the leading rim of the circle: without it the
+      // boundary between the two themes is a razor line sweeping the page.
+      root.animate({ opacity: [0, 1] }, { ...options, duration: 220 });
     });
   };
 
