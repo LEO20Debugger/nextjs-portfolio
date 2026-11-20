@@ -80,28 +80,34 @@ export function ThemeToggle() {
       flushSync(() => apply(next));
     });
 
-    transition.ready.then(() => {
-      const root = document.documentElement;
-      const options = {
-        duration: 620,
-        // Quint ease-out: quick to commit, long and soft to settle.
-        easing: "cubic-bezier(0.22, 1, 0.36, 1)",
-        pseudoElement: "::view-transition-new(root)",
-      } as const;
+    transition.ready
+      .then(() => {
+        const root = document.documentElement;
+        const options = {
+          duration: 620,
+          // Quint ease-out: quick to commit, long and soft to settle.
+          easing: "cubic-bezier(0.22, 1, 0.36, 1)",
+          pseudoElement: "::view-transition-new(root)",
+        } as const;
 
-      root.animate(
-        {
-          clipPath: [
-            `circle(0px at ${x}px ${y}px)`,
-            `circle(${radius}px at ${x}px ${y}px)`,
-          ],
-        },
-        options
-      );
-      // Takes the hard edge off the leading rim of the circle: without it the
-      // boundary between the two themes is a razor line sweeping the page.
-      root.animate({ opacity: [0, 1] }, { ...options, duration: 220 });
-    });
+        root.animate(
+          {
+            clipPath: [
+              `circle(0px at ${x}px ${y}px)`,
+              `circle(${radius}px at ${x}px ${y}px)`,
+            ],
+          },
+          options
+        );
+        // Takes the hard edge off the leading rim of the circle: without it
+        // the boundary between the themes is a razor line sweeping the page.
+        root.animate({ opacity: [0, 1] }, { ...options, duration: 220 });
+      })
+      // `ready` rejects with an AbortError when this transition is superseded,
+      // which a second click mid-wipe does. There is nothing to do about it,
+      // but the chain has to end in a catch or it surfaces as an uncaught
+      // rejection — as it did before this was here.
+      .catch(() => {});
   };
 
   return (

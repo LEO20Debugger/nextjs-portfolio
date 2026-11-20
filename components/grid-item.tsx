@@ -19,10 +19,12 @@ const variants = cva(
         // Project cards — one media layout on every device now, so the row
         // span no longer forks on whether the pointer can hover.
         //
-        // At 2xl they drop to a third of the grid so three sit per row, and
-        // the padding stays tight: on a 328px card every extra pixel of it
-        // comes straight out of the screenshot.
-        "2x1": "md:col-span-6 col-span-full 2xl:col-span-4 row-span-3 p-4",
+        // Three per row at xl and four at 2xl. The screenshot frame is locked
+        // to 16:9 and sized by the card's width, so narrower cards are the
+        // only way to make them shorter without cropping the preview — which
+        // is why the column count carries this rather than the row span.
+        "2x1":
+          "md:col-span-6 col-span-full xl:col-span-4 2xl:col-span-3 row-span-3 xl:row-span-2 p-4 xl:p-3",
         "2x2": "md:col-span-6 col-span-full row-span-2 md:p-8 p-4",
         "2x4":
           "md:col-span-6 col-span-full row-span-4 relative overflow-hidden",
@@ -71,9 +73,17 @@ export type GridItemProps = {
   index?: number;
   /** How many birds perch on this card's top edge. */
   birds?: number;
+  /** Hide the card from xl up, leaving it in place on narrower screens. */
+  hideOnDesktop?: boolean;
 } & VariantProps<typeof variants>;
 
-const GridItem = ({ size, children, index = 0, birds = 0 }: GridItemProps) => {
+const GridItem = ({
+  size,
+  children,
+  index = 0,
+  birds = 0,
+  hideOnDesktop = false,
+}: GridItemProps) => {
   const reduceMotion = usePrefersReducedMotion();
   const spotlightRef = useRef<HTMLDivElement>(null);
 
@@ -104,8 +114,10 @@ const GridItem = ({ size, children, index = 0, birds = 0 }: GridItemProps) => {
       className={cn(
         variants({
           size,
-          className:
+          className: cn(
             "relative transition-[background-color,box-shadow,border-color] duration-200 ease-out hover:bg-neutral-50 hover:shadow-grid-hover hover:border-neutral-200 dark:hover:bg-neutral-800 dark:hover:border-neutral-700",
+            hideOnDesktop && "xl:hidden"
+          ),
         })
       )}
     >

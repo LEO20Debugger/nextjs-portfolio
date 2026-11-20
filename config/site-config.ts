@@ -25,6 +25,12 @@ export interface GridItemInterface {
   websiteLink?: string;
   /** Key into `projectPreviews` in config/previews.ts */
   previewImage?: string;
+  /**
+   * Dropped from the grid at xl and up. Still rendered (and still indexed),
+   * just hidden — desktop shows a tighter, curated set while narrower
+   * screens, which scroll anyway, keep the full list.
+   */
+  hideOnDesktop?: boolean;
   /* Equipments */
   equipments?: EqiupmentItem[];
   image?: string;
@@ -77,6 +83,7 @@ const GridItems: GridItemInterface[] = [
     buttonLink: "https://github.com/LEO20Debugger/byte-me",
     description: "A quirky CLI that spices up your terminal with geeky messages.",
     previewImage: "byte-me",
+    hideOnDesktop: true,
   },
   {
     layout: "2x1",
@@ -88,6 +95,7 @@ const GridItems: GridItemInterface[] = [
     websiteLink: "https://www.paradisedaypass.com/",
     description: "Resort booking platform for day pass experiences.",
     previewImage: "pradisedaypass",
+    hideOnDesktop: true,
   },
   {
     layout: "2x1",

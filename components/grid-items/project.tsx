@@ -21,7 +21,7 @@ const Project = ({ item }: { item: GridItemInterface }) => {
     : undefined;
 
   return (
-    <div className="flex h-full flex-col gap-3">
+    <div className="flex h-full flex-col gap-2">
       {preview && (
         /* A fixed 16:9 frame rather than one that stretches to fill the
            card: the previews are all 960x540, and letting the frame take the
@@ -39,7 +39,7 @@ const Project = ({ item }: { item: GridItemInterface }) => {
       )}
 
       {/* Takes the height the frame leaves over, and centres itself in it. */}
-      <div className="flex min-h-0 flex-1 items-center gap-4">
+      <div className="flex min-h-0 flex-1 items-center gap-3">
         {item.icon && <Icon type={item.icon} color={item.color} />}
         <div className="w-full min-w-0">
           <div className="@lg:text-lg font-semibold truncate">{item.title}</div>
@@ -49,7 +49,7 @@ const Project = ({ item }: { item: GridItemInterface }) => {
             </div>
           )}
           {(item.websiteLink || item.buttonLink) && (
-            <div className="flex items-center gap-3 mt-1.5">
+            <div className="flex items-center gap-3 mt-1">
               {item.buttonLink && (
                 <Link
                   href={item.buttonLink}
