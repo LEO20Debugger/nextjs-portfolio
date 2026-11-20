@@ -5,6 +5,7 @@ import { Github } from "lucide-react";
 import Link from "next/link";
 import GridItem, { gridItemMotion, gridItemViewport } from "./grid-item";
 import Project from "./grid-items/project";
+import NowPlaying from "./grid-items/now-playing";
 import Social from "./grid-items/social";
 import TechStack from "./grid-items/tech-stack";
 
@@ -32,6 +33,8 @@ const RightPanel = () => {
                 <Project item={item} />
               ) : item.type === "techstack" ? (
                 <TechStack />
+              ) : item.type === "music" ? (
+                <NowPlaying />
               ) : (
                 <div>Need to create new component type.</div>
               )}

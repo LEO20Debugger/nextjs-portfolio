@@ -26,6 +26,10 @@ const variants = cva(
         "2x1":
           "md:col-span-6 col-span-full xl:col-span-4 2xl:col-span-3 row-span-3 xl:row-span-2 p-4 xl:p-3",
         "2x2": "md:col-span-6 col-span-full row-span-2 md:p-8 p-4",
+        // A single-row bar, full width at every size. One row is 76px, which
+        // is just enough for a 48px cover and two lines beside it, and the
+        // wide-and-short shape is the point of it.
+        "4x1": "col-span-full row-span-1 px-5",
         "2x4":
           "md:col-span-6 col-span-full row-span-4 relative overflow-hidden",
         // Taller on phones: nine tech chips in a two-row-high card is far too

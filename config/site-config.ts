@@ -1,5 +1,11 @@
-export type GridItemLayout = "1x2" | "2x1" | "2x2" | "2x4" | "4x2"; // First number is width, second is height
-export type GridItemType = "social" | "equipment" | "mentor" | "project" | "techstack";
+export type GridItemLayout = "1x2" | "2x1" | "2x2" | "2x4" | "4x2" | "4x1"; // First number is width, second is height
+export type GridItemType =
+  | "social"
+  | "equipment"
+  | "mentor"
+  | "project"
+  | "techstack"
+  | "music";
 export type EqiupmentItem = {
   title: string;
   link: string;
@@ -68,6 +74,13 @@ const GridItems: GridItemInterface[] = [
     buttonTitle: "Follow",
     buttonLink: "https://github.com/LEO20Debugger",
     color: "#070707",
+  },
+  {
+    // Whatever is on Spotify right now, or the last thing that was. Carries
+    // no data of its own: the card fetches from /api/now-playing.
+    layout: "4x1",
+    type: "music",
+    title: "Music",
   },
   {
     layout: "4x2",
