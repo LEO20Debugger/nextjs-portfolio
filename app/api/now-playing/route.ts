@@ -17,8 +17,6 @@ export const dynamic = "force-dynamic";
 const TOKEN_URL = "https://accounts.spotify.com/api/token";
 const NOW_PLAYING_URL =
   "https://api.spotify.com/v1/me/player/currently-playing";
-const RECENT_URL =
-  "https://api.spotify.com/v1/me/player/recently-played?limit=1";
 
 export type NowPlaying = {
   /** True only while a track is actually playing, not paused or stale. */
@@ -135,18 +133,10 @@ export async function GET() {
         if (json.item) body = shape(json.item, Boolean(json.is_playing));
       }
 
-      // Nothing on now, so fall back to the last thing played — an empty card
-      // most of the day is worse than a slightly old one.
-      if (!body.title) {
-        const recent = await fetch(RECENT_URL, { headers, cache: "no-store" });
-        if (recent.ok) {
-          const json = (await recent.json()) as {
-            items?: { track?: SpotifyItem }[];
-          };
-          const track = json.items?.[0]?.track;
-          if (track) body = shape(track, false);
-        }
-      }
+      // Deliberately no fall back to the last thing played. An earlier
+      // version did, which meant the card almost never showed its empty
+      // state and "Leo is listening to" could be a track he finished hours
+      // ago. Silence is the honest answer and the card says so.
     }
   } catch {
     // Spotify down, token revoked, network gone: the card shows nothing and

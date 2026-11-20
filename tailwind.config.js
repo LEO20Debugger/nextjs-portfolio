@@ -36,6 +36,18 @@ module.exports = {
         "grid-hover":
           "0px 4px 12px 0px rgba(0, 0, 0, 0.10), 0px 16px 40px 0px rgba(0, 0, 0, 0.10)",
       },
+      keyframes: {
+        // The bars of the equalizer on the Music card. Each one is given its
+        // own duration and delay at the call site, so three bars sharing one
+        // keyframe never pulse in lockstep.
+        eq: {
+          "0%, 100%": { transform: "scaleY(0.28)" },
+          "50%": { transform: "scaleY(1)" },
+        },
+      },
+      animation: {
+        eq: "eq 800ms ease-in-out infinite",
+      },
     },
   },
   plugins: [require("@tailwindcss/container-queries")],

@@ -1,7 +1,7 @@
 "use client";
 
 import type { NowPlaying as Track } from "@/app/api/now-playing/route";
-import { Headphones } from "lucide-react";
+import { Headphones, Music } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 
 /**
@@ -16,6 +16,42 @@ import { useCallback, useEffect, useState } from "react";
  * catches up the moment it comes back.
  */
 const POLL_MS = 45_000;
+
+/**
+ * Bars that bounce while something is actually playing.
+ *
+ * Only shown when Spotify reports `is_playing`, which is a real distinction
+ * rather than decoration: a paused track still comes back with a title, so
+ * the bars are the only thing separating "on right now" from "stopped
+ * halfway through this an hour ago".
+ *
+ * The heights differ as well as the timings, so with animation turned off it
+ * still reads as an equalizer rather than three identical ticks.
+ */
+const BARS = [
+  { height: "55%", duration: 760, delay: 0 },
+  { height: "100%", duration: 880, delay: 140 },
+  { height: "72%", duration: 700, delay: 280 },
+];
+
+const Equalizer = () => (
+  <span
+    aria-hidden
+    className="flex h-3.5 shrink-0 items-end gap-[2px] @lg:h-4"
+  >
+    {BARS.map((bar, i) => (
+      <span
+        key={i}
+        className="w-[3px] origin-bottom rounded-[1px] bg-primary motion-safe:animate-eq"
+        style={{
+          height: bar.height,
+          animationDuration: `${bar.duration}ms`,
+          animationDelay: `${bar.delay}ms`,
+        }}
+      />
+    ))}
+  </span>
+);
 
 const NowPlaying = () => {
   const [track, setTrack] = useState<Track | null>(null);
@@ -93,9 +129,18 @@ const NowPlaying = () => {
       <>
         {label}
         <div className="flex h-full items-center gap-3">
-          <div className="h-12 w-12 shrink-0 rounded-lg border border-neutral-100 bg-neutral-50 dark:border-neutral-800 dark:bg-neutral-800" />
-          <div className="text-sm text-neutral-400 dark:text-neutral-500">
-            Not listening to anything
+          {/* A bare glyph where the cover would be, rather than an empty
+              frame: a blank square reads as a picture that failed to load. */}
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center text-neutral-300 @lg:h-14 @lg:w-14 dark:text-neutral-700">
+            <Music className="h-7 w-7" strokeWidth={1.75} />
+          </div>
+          <div className="min-w-0">
+            <div className="truncate text-sm font-semibold text-neutral-500 @lg:text-base dark:text-neutral-400">
+              Nothing right now
+            </div>
+            <div className="truncate text-xs text-neutral-400 @lg:text-sm dark:text-neutral-600">
+              I&apos;m not currently listening to any music
+            </div>
           </div>
         </div>
       </>
@@ -120,8 +165,11 @@ const NowPlaying = () => {
         <div className="h-12 w-12 shrink-0 rounded-lg bg-neutral-100 @lg:h-14 @lg:w-14 dark:bg-neutral-800" />
       )}
       <div className="min-w-0 flex-1">
-        <div className="truncate text-sm font-semibold @lg:text-base">
-          {track.title}
+        <div className="flex items-center gap-2">
+          {track.isPlaying && <Equalizer />}
+          <div className="truncate text-sm font-semibold @lg:text-base">
+            {track.title}
+          </div>
         </div>
         {track.artist && (
           <div className="truncate text-xs text-neutral-500 @lg:text-sm">
