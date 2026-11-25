@@ -68,7 +68,9 @@ export const metadata: Metadata = {
     description: siteConfig.bio,
   },
   twitter: {
-    card: "summary_large_image",
+    // No og:image route any more, so a large-image card would render as an
+    // empty frame. `summary` is the text-only card.
+    card: "summary",
     title: `${siteConfig.creator} — ${siteConfig.title}`,
     description: siteConfig.bio,
     creator: "@Brainergybyleo",
