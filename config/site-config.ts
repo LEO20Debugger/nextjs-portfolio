@@ -144,12 +144,12 @@ const GridItems: GridItemInterface[] = [
 
 /**
  * Canonical origin, used for metadata, OG tags, sitemap and JSON-LD.
- * Set NEXT_PUBLIC_SITE_URL in the deployment environment — the fallback is only
- * a placeholder and will produce wrong canonical URLs if left in place.
+ * NEXT_PUBLIC_SITE_URL overrides it for preview deployments; the fallback is
+ * the production domain, so a plain build is already correct.
  */
 export const siteUrl =
   process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ??
-  "https://leonard-oba.vercel.app";
+  "https://brainergybyleo.dev";
 
 export const siteConfig = {
   url: siteUrl,
